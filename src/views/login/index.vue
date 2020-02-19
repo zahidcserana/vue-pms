@@ -1,7 +1,6 @@
 <template>
   <div class="login-container">
     <el-form ref="loginForm" :model="loginForm" :rules="loginRules" class="login-form" autocomplete="on" label-position="left">
-
       <div class="title-container">
         <h3 class="title">Login Form</h3>
       </div>
@@ -78,6 +77,7 @@ import { validUsername } from '@/utils/validate'
 import SocialSign from './components/SocialSignin'
 import axios from 'axios'
 import { env } from '@/utils/auth'
+import { setToken } from '@/utils/auth'
 
 export default {
   name: 'Login',
@@ -165,6 +165,7 @@ export default {
           //   showConfirmButton: false,
           //   timer: 1500
           // });
+          setToken('Admin-Token')
           this.$router.push({ path: this.redirect || '/', query: this.otherQuery })
           this.loading = false
         })
