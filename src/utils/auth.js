@@ -13,3 +13,12 @@ export function setToken(token) {
 export function removeToken() {
   return Cookies.remove(TokenKey)
 }
+
+export const env = {
+  production: false,
+  api_url: 'http://127.0.0.1:8000/api/',
+  protocal: 'http://',
+  storeHoshName: 'localhost:8080',
+  patnerHoshName: 'localhost:8080',
+  partner: 'localhost'
+}

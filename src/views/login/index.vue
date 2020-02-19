@@ -76,6 +76,8 @@
 <script>
 import { validUsername } from '@/utils/validate'
 import SocialSign from './components/SocialSignin'
+import axios from 'axios'
+import { env } from '@/utils/auth'
 
 export default {
   name: 'Login',
@@ -98,7 +100,7 @@ export default {
     return {
       loginForm: {
         username: 'admin',
-        password: '111111'
+        password: 'password@123'
       },
       loginRules: {
         username: [{ required: true, trigger: 'blur', validator: validateUsername }],
@@ -153,22 +155,44 @@ export default {
       })
     },
     handleLogin() {
-      this.$refs.loginForm.validate(valid => {
-        if (valid) {
-          this.loading = true
-          this.$store.dispatch('user/login', this.loginForm)
-            .then(() => {
-              this.$router.push({ path: this.redirect || '/', query: this.otherQuery })
-              this.loading = false
-            })
-            .catch(() => {
-              this.loading = false
-            })
-        } else {
-          console.log('error submit!!')
-          return false
-        }
-      })
+      axios
+        .post(env.api_url + `token/`, this.loginForm)
+        .then(response => {
+          // this.$swal({
+          //   position: "top-end",
+          //   icon: "success",
+          //   title: "Data has been saved",
+          //   showConfirmButton: false,
+          //   timer: 1500
+          // });
+          this.$router.push({ path: this.redirect || '/', query: this.otherQuery })
+          this.loading = false
+        })
+        .catch(e => {
+          this.$swal({
+            icon: 'error',
+            title: 'Oops...',
+            text: 'Something went wrong!',
+            showConfirmButton: false,
+            timer: 1500
+          })
+        })
+      // this.$refs.loginForm.validate(valid => {
+      //   if (valid) {
+      //     this.loading = true
+      //     this.$store.dispatch('user/login', this.loginForm)
+      //       .then(() => {
+      //         this.$router.push({ path: this.redirect || '/', query: this.otherQuery })
+      //         this.loading = false
+      //       })
+      //       .catch(() => {
+      //         this.loading = false
+      //       })
+      //   } else {
+      //     console.log('error submit!!')
+      //     return false
+      //   }
+      // })
     },
     getOtherQuery(query) {
       return Object.keys(query).reduce((acc, cur) => {

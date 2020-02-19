@@ -1,6 +1,8 @@
 import Vue from 'vue'
 import Router from 'vue-router'
+import VueSwal from 'vue-swal'
 
+Vue.use(VueSwal)
 Vue.use(Router)
 
 /* Layout */
