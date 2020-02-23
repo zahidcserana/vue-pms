@@ -1,4 +1,5 @@
 import request from '@/utils/request'
+import { env } from '@/utils'
 
 export function login(data) {
   return request({
@@ -10,7 +11,8 @@ export function login(data) {
 
 export function getInfo(token) {
   return request({
-    url: '/vue-element-admin/user/info',
+    url: 'http://127.0.0.1:8000/api/users/info/',
+    // url: '/vue-element-admin/user/info',
     method: 'get',
     params: { token }
   })
@@ -20,5 +22,29 @@ export function logout() {
   return request({
     url: '/vue-element-admin/user/logout',
     method: 'post'
+  })
+}
+
+export function fetchUserList(query) {
+  return request({
+    url: `${env.api_url}/users/`,
+    method: 'get',
+    params: query
+  })
+}
+
+export function updateUser(data) {
+  return request({
+    url: `${env.api_url}/users/${data.id}/`,
+    method: 'put',
+    data
+  })
+}
+
+export function createUser(data) {
+  return request({
+    url: `${env.api_url}/users/`,
+    method: 'post',
+    data
   })
 }

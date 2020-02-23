@@ -172,6 +172,38 @@ export const asyncRoutes = [
       }
     ]
   },
+  {
+    path: '/users',
+    component: Layout,
+    redirect: '/users/list',
+    alwaysShow: true, // will always show the root menu
+    name: 'User',
+    meta: {
+      title: 'Users',
+      icon: 'user',
+      roles: ['admin', 'editor'] // you can set roles in root nav
+    },
+    children: [
+      {
+        path: 'list',
+        component: () => import('@/views/user/list'),
+        name: 'UserList',
+        meta: {
+          title: 'User List',
+          roles: ['admin'] // or you can only set roles in sub nav
+        }
+      },
+      {
+        path: 'directive',
+        component: () => import('@/views/permission/directive'),
+        name: 'DirectivePermission',
+        meta: {
+          title: 'New User'
+          // if do not set roles, means: this page does not require permission
+        }
+      }
+    ]
+  },
 
   {
     path: '/icon',

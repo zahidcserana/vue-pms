@@ -8,6 +8,15 @@
  * @param {string} cFormat
  * @returns {string | null}
  */
+
+export const env = {
+  production: false,
+  api_url: 'http://127.0.0.1:8000/api',
+  protocal: 'http://',
+  storeHoshName: 'localhost:8080',
+  patnerHoshName: 'localhost:8080',
+  partner: 'localhost'
+}
 export function parseTime(time, cFormat) {
   if (arguments.length === 0) {
     return null
