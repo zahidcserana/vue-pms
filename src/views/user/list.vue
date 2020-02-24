@@ -258,7 +258,7 @@ export default {
         name: undefined,
         email: undefined,
         type: undefined,
-        sort: '+id'
+        ordering: '+id'
       },
       importanceOptions: [1, 2, 3],
       calendarTypeOptions,
@@ -335,9 +335,9 @@ export default {
     },
     sortByID(order) {
       if (order === 'ascending') {
-        this.listQuery.sort = '+id'
+        this.listQuery.ordering = '+id'
       } else {
-        this.listQuery.sort = '-id'
+        this.listQuery.ordering = '-id'
       }
       this.handleFilter()
     },
@@ -453,8 +453,8 @@ export default {
       }))
     },
     getSortClass: function(key) {
-      const sort = this.listQuery.sort
-      return sort === `+${key}` ? 'ascending' : 'descending'
+      const ordering = this.listQuery.ordering
+      return ordering === `+${key}` ? 'ascending' : 'descending'
     }
   }
 }
