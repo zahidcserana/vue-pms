@@ -248,11 +248,19 @@ export default {
       this.getList()
     },
     handleModifyStatus(row, status) {
-      this.$message({
-        message: 'Success',
-        type: 'success'
+      console.log(status)
+      const statusData = { status: status, id: row.id }
+      updateUser(statusData).then(() => {
+        this.getList()
+        this.dialogFormVisible = false
+        this.$message({
+          message: 'Success',
+          type: 'success'
+        })
+        row.status = status
+      }).catch(e => {
+        console.log(e)
       })
-      row.status = status
     },
     sortChange(data) {
       const { prop, order } = data
