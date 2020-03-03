@@ -56,6 +56,11 @@
           <span>{{ row.mobile }}</span>
         </template>
       </el-table-column>
+      <el-table-column label="Date" width="150px" align="center">
+        <template slot-scope="{row}">
+          <span>{{ row.timestamp | parseTime('{y}-{m}-{d} {h}:{i}') }}</span>
+        </template>
+      </el-table-column>
       <el-table-column label="Type" class-name="status-col" width="100">
         <template slot-scope="{row}">
           <el-tag :type="row.type | userTypeFilter">
