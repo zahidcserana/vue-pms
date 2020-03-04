@@ -11,7 +11,7 @@ export function login(data) {
 
 export function getInfo(token) {
   return request({
-    url: 'http://127.0.0.1:8000/api/users/info/',
+    url: `${env.domain}users/token/info/`,
     // url: '/vue-element-admin/user/info',
     method: 'get',
     params: { token }
@@ -28,6 +28,14 @@ export function logout() {
 export function fetchUserList(query) {
   return request({
     url: `${env.api_url}/users/`,
+    method: 'get',
+    params: query
+  })
+}
+
+export function fetchDepartmentList(query) {
+  return request({
+    url: `${env.api_url}/departments/`,
     method: 'get',
     params: query
   })

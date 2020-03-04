@@ -94,11 +94,17 @@
     </el-table>
 
     <pagination v-show="total>0" :total="total" :page.sync="listQuery.page" :limit.sync="listQuery.limit" @pagination="getList" />
+
     <el-dialog :title="textMap[dialogStatus]" :visible.sync="dialogFormVisible">
       <el-form ref="dataForm" :rules="rules" :model="user" label-position="left" label-width="70px" style="width: 400px; margin-left:50px;">
         <el-form-item label="Type" prop="type">
           <el-select v-model="user.type" class="filter-item" placeholder="Please select">
             <el-option v-for="item in userTypeOptions" :key="item.key" :label="item.display_name" :value="item.key" />
+          </el-select>
+        </el-form-item>
+        <el-form-item label="Department" prop="department">
+          <el-select v-model="user.department" class="filter-item" placeholder="Please select">
+            <el-option v-for="item in departments" :key="item.id" :label="item.name" :value="item.id" />
           </el-select>
         </el-form-item>
         <el-form-item label="Name" prop="name">
@@ -140,7 +146,7 @@
 
 <script>
 import { fetchPv } from '@/api/article'
-import { fetchUserList, updateUser, createUser } from '@/api/user'
+import { fetchUserList, updateUser, createUser, fetchDepartmentList } from '@/api/user'
 import waves from '@/directive/waves' // waves directive
 import { parseTime } from '@/utils'
 import Pagination from '@/components/Pagination' // secondary package based on el-pagination
@@ -184,6 +190,7 @@ export default {
     return {
       tableKey: 0,
       list: null,
+      departments: null,
       total: 0,
       listLoading: true,
       listQuery: {
@@ -203,6 +210,7 @@ export default {
       user: {
         id: undefined,
         name: '',
+        department: '',
         email: '',
         mobile: '',
         type: 'USER',
@@ -225,6 +233,7 @@ export default {
   },
   created() {
     this.getList()
+    this.departmentList()
   },
   methods: {
     getList() {
@@ -237,6 +246,12 @@ export default {
         setTimeout(() => {
           this.listLoading = false
         }, 1.5 * 1000)
+      })
+    },
+    departmentList() {
+      fetchDepartmentList().then(response => {
+        this.departments = response.data.items
+        console.log(this.departments)
       })
     },
     handleFilter() {
