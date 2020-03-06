@@ -41,19 +41,24 @@
           <span>{{ row.id }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="Name" width="300px">
+      <el-table-column label="Name" width="200px">
         <template slot-scope="{row}">
           <span class="link-type" @click="handleUpdate(row)">{{ row.name }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="Email" width="300px">
+      <el-table-column label="Email" width="200px">
         <template slot-scope="{row}">
           <span>{{ row.email }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="Mobile" width="300px" align="center">
+      <el-table-column label="Mobile" width="200px" align="center">
         <template slot-scope="{row}">
           <span>{{ row.mobile }}</span>
+        </template>
+      </el-table-column>
+      <el-table-column label="Department" width="200px" align="center">
+        <template slot-scope="{row}">
+          <span>{{ row.department == null ? '' : row.department.name }}</span>
         </template>
       </el-table-column>
       <el-table-column label="Date" width="150px" align="center">
@@ -76,7 +81,7 @@
         </template>
       </el-table-column>
       <el-table-column label="Actions" align="center" width="230" class-name="small-padding fixed-width">
-        <template slot-scope="{row,$index}">
+        <template slot-scope="{row}">
           <el-button type="primary" size="mini" @click="handleUpdate(row)">
             Edit
           </el-button>
@@ -86,7 +91,7 @@
           <el-button v-if="row.status!='INACTIVE'" size="mini" @click="handleModifyStatus(row,'INACTIVE')">
             Inactive
           </el-button>
-          <el-button v-if="row.status!='DELETE'" size="mini" type="danger" @click="handleDelete(row,$index)">
+          <el-button v-if="row.status!='DELETE'" size="mini" type="danger" @click="handleModifyStatus(row,'DELETE')">
             Delete
           </el-button>
         </template>
@@ -96,14 +101,14 @@
     <pagination v-show="total>0" :total="total" :page.sync="listQuery.page" :limit.sync="listQuery.limit" @pagination="getList" />
 
     <el-dialog :title="textMap[dialogStatus]" :visible.sync="dialogFormVisible">
-      <el-form ref="dataForm" :rules="rules" :model="user" label-position="left" label-width="70px" style="width: 400px; margin-left:50px;">
+      <el-form ref="dataForm" :rules="rules" :model="user" label-position="left" label-width="100px" style="width: 400px; margin-left:50px;">
         <el-form-item label="Type" prop="type">
           <el-select v-model="user.type" class="filter-item" placeholder="Please select">
             <el-option v-for="item in userTypeOptions" :key="item.key" :label="item.display_name" :value="item.key" />
           </el-select>
         </el-form-item>
         <el-form-item label="Department" prop="department">
-          <el-select v-model="user.department" class="filter-item" placeholder="Please select">
+          <el-select v-model="user.department_id" class="filter-item" placeholder="Please select">
             <el-option v-for="item in departments" :key="item.id" :label="item.name" :value="item.id" />
           </el-select>
         </el-form-item>
@@ -210,7 +215,7 @@ export default {
       user: {
         id: undefined,
         name: '',
-        department: '',
+        department_id: '',
         email: '',
         mobile: '',
         type: 'USER',
