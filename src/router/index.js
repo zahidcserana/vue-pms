@@ -204,6 +204,38 @@ export const asyncRoutes = [
       }
     ]
   },
+  {
+    path: '/patients',
+    component: Layout,
+    redirect: '/patients',
+    alwaysShow: true, // will always show the root menu
+    name: 'Patient',
+    meta: {
+      title: 'patients',
+      icon: 'peoples',
+      roles: ['admin', 'editor'] // you can set roles in root nav
+    },
+    children: [
+      {
+        path: '',
+        component: () => import('@/views/patient/list'),
+        name: 'PatientList',
+        meta: {
+          title: 'Patient List',
+          roles: ['admin'] // or you can only set roles in sub nav
+        }
+      },
+      {
+        path: 'directive',
+        component: () => import('@/views/permission/directive'),
+        name: 'DirectivePermission',
+        meta: {
+          title: 'New User'
+          // if do not set roles, means: this page does not require permission
+        }
+      }
+    ]
+  },
 
   {
     path: '/icon',
