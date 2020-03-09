@@ -16,6 +16,8 @@
 </template>
 
 <script>
+import { updatePatient } from '@/api/patient'
+
 export default {
   props: {
     user: {
@@ -31,16 +33,16 @@ export default {
   },
   methods: {
     submit() {
-      // const userData = Object.assign({}, this.user)
-      // updatePatient(userData).then(() => {
-      //   this.$message({
-      //     message: 'User information has been updated successfully',
-      //     type: 'success',
-      //     duration: 5 * 1000
-      //   })
-      // }).catch(e => {
-      //   console.log(e)
-      // })
+      const userData = Object.assign({}, this.user)
+      updatePatient(userData).then(() => {
+        this.$message({
+          message: 'User information has been updated successfully',
+          type: 'success',
+          duration: 5 * 1000
+        })
+      }).catch(e => {
+        console.log(e)
+      })
     }
   }
 }

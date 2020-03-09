@@ -61,6 +61,7 @@ export default {
       const id = this.$route.params && this.$route.params.id
       patientInfo(id).then(response => {
         this.user = {
+          id: response.data.id,
           name: response.data.name,
           mobile: response.data.mobile,
           role: this.roles.join(' | '),
