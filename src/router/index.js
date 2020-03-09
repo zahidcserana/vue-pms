@@ -226,11 +226,11 @@ export const asyncRoutes = [
         }
       },
       {
-        path: 'directive',
-        component: () => import('@/views/permission/directive'),
-        name: 'DirectivePermission',
+        path: 'edit/:id(\\d+)',
+        component: () => import('@/views/patient/profile'),
+        name: 'Patient',
         meta: {
-          title: 'New User'
+          title: 'Patient View'
           // if do not set roles, means: this page does not require permission
         }
       }
