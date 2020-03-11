@@ -9,7 +9,7 @@ Vue.use(Router)
 import Layout from '@/layout'
 
 /* Router Modules */
-import componentsRouter from './modules/components'
+import appointmentsRouter from './modules/appointments'
 import chartsRouter from './modules/charts'
 import tableRouter from './modules/table'
 import nestedRouter from './modules/nested'
@@ -251,7 +251,7 @@ export const asyncRoutes = [
   },
 
   /** when your routing map is too long, you can split it into small modules **/
-  componentsRouter,
+  appointmentsRouter,
   chartsRouter,
   nestedRouter,
   tableRouter,
@@ -262,7 +262,7 @@ export const asyncRoutes = [
     redirect: '/example/list',
     name: 'Example',
     meta: {
-      title: 'Example',
+      title: 'Doctors',
       icon: 'example'
     },
     children: [
