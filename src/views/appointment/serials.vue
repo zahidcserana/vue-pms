@@ -5,9 +5,6 @@
       <el-select v-model="listQuery.status" placeholder="Status" clearable style="width: 90px" class="filter-item">
         <el-option v-for="item in statusOptions" :key="item" :label="item" :value="item" />
       </el-select>
-      <el-select v-model="listQuery.type" placeholder="Type" clearable class="filter-item" style="width: 130px">
-        <el-option v-for="item in userTypeOptions" :key="item.key" :label="item.display_name+'('+item.key+')'" :value="item.key" />
-      </el-select>
       <el-select v-model="listQuery.ordering" style="width: 140px" class="filter-item" @change="handleFilter">
         <el-option v-for="item in sortOptions" :key="item.key" :label="item.label" :value="item.key" />
       </el-select>
@@ -70,11 +67,11 @@
           <el-button v-if="row.status!='ACTIVE'" size="mini" type="success" @click="handleModifyStatus(row,'ACTIVE')">
             Active
           </el-button>
-          <el-button v-if="row.status!='INACTIVE'" size="mini" @click="handleModifyStatus(row,'INACTIVE')">
-            Inactive
+          <el-button v-if="row.status!='ATTEND'" size="mini" @click="handleModifyStatus(row,'ATTEND')">
+            Attend
           </el-button>
-          <el-button v-if="row.status!='DELETE'" size="mini" type="danger" @click="handleModifyStatus(row,'DELETE')">
-            Delete
+          <el-button v-if="row.status!='CANCEL'" size="mini" type="danger" @click="handleModifyStatus(row,'CANCEL')">
+            Cancel
           </el-button>
         </template>
       </el-table-column>
@@ -83,7 +80,10 @@
     <pagination v-show="total>0" :total="total" :page.sync="listQuery.page" :limit.sync="listQuery.limit" @pagination="getList" />
 
     <el-dialog :title="textMap[dialogStatus]" :visible.sync="dialogFormVisible">
-      <el-form ref="dataForm" :rules="rules" :model="user" label-position="left" label-width="100px" style="width: 400px; margin-left:50px;">
+      <el-form ref="dataForm" :rules="rules" :model="user" label-position="left" label-width="120px" style="width: 420px; margin-left:50px;">
+        <el-form-item label="Schedule Time" prop="schedule_time">
+          <el-date-picker v-model="user.schedule_time" type="datetime" format="yyyy-MM-dd HH:mm:ss" placeholder="Select date and time" />
+        </el-form-item>
         <el-form-item label="Name" prop="name">
           <el-input v-model="user.name" />
         </el-form-item>
@@ -119,22 +119,10 @@
 </template>
 
 <script>
-import { fetchPv } from '@/api/article'
 import { fetchAppointmentSerials, updateAppointmentSerial, createAppointmentSerial } from '@/api/appointment'
 import waves from '@/directive/waves' // waves directive
 import { parseTime } from '@/utils'
 import Pagination from '@/components/Pagination' // secondary package based on el-pagination
-
-const userTypeOptions = [
-  { key: 'REGULAR', display_name: 'Regular' },
-  { key: 'IRREGULAR', display_name: 'Irregular' }
-]
-
-// arr to obj, such as { CN : "China", US : "USA" }
-const userTypeKeyValue = userTypeOptions.reduce((acc, cur) => {
-  acc[cur.key] = cur.display_name
-  return acc
-}, {})
 
 export default {
   name: 'ComplexTable',
@@ -144,20 +132,10 @@ export default {
     statusFilter(status) {
       const statusMap = {
         ACTIVE: 'success',
-        INACTIVE: 'info',
-        DELETE: 'danger'
+        ATTEND: 'info',
+        CANCEL: 'danger'
       }
       return statusMap[status]
-    },
-    userTypeFilter(status) {
-      const statusMap = {
-        REGULAR: 'primary',
-        IRREGULAR: 'danger'
-      }
-      return statusMap[status]
-    },
-    typeFilter(type) {
-      return userTypeKeyValue[type]
     }
   },
   data() {
@@ -172,19 +150,18 @@ export default {
         limit: 20,
         status: undefined,
         name: undefined,
-        email: undefined,
+        schedule_time: undefined,
         type: undefined,
         ordering: '+id'
       },
       importanceOptions: [1, 2, 3],
-      userTypeOptions,
       sortOptions: [{ label: 'ID Ascending', key: '+id' }, { label: 'ID Descending', key: '-id' }],
       statusOptions: ['ACTIVE', 'CANCEL', 'ATTEND'],
       showReviewer: false,
       user: {
         id: undefined,
         name: '',
-        email: '',
+        schedule_time: '',
         mobile: '',
         status: 'ACTIVE'
       },
@@ -261,7 +238,7 @@ export default {
       this.user = {
         id: undefined,
         name: '',
-        email: '',
+        schedule_time: '',
         mobile: '',
         status: 'ACTIVE',
         type: 'REGULAR'
@@ -271,7 +248,7 @@ export default {
         limit: 20,
         status: undefined,
         name: undefined,
-        email: undefined,
+        schedule_time: undefined,
         type: undefined,
         ordering: '+id'
       }
@@ -339,17 +316,11 @@ export default {
       })
       this.list.splice(index, 1)
     },
-    handleFetchPv(pv) {
-      fetchPv(pv).then(response => {
-        this.pvData = response.data.pvData
-        this.dialogPvVisible = true
-      })
-    },
     handleDownload() {
       this.downloadLoading = true
       import('@/vendor/Export2Excel').then(excel => {
-        const tHeader = ['name', 'email', 'mobile', 'type', 'status']
-        const filterVal = ['name', 'email', 'mobile', 'type', 'status']
+        const tHeader = ['name', 'mobile', 'type', 'status']
+        const filterVal = ['name', 'mobile', 'type', 'status']
         const data = this.formatJson(filterVal)
         excel.export_json_to_excel({
           header: tHeader,

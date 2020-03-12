@@ -14,9 +14,9 @@ const appointmentsRouter = {
   children: [
     {
       path: 'appointments',
-      component: () => import('@/views/appointment/index'),
-      name: 'MarkdownDemo',
-      meta: { title: 'Markdown' }
+      component: () => import('@/views/appointment/serials'),
+      name: 'Serial',
+      meta: { title: 'Serial' }
     },
     {
       path: 'markdown',
