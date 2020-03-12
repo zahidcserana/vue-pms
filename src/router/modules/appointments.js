@@ -13,6 +13,12 @@ const appointmentsRouter = {
   },
   children: [
     {
+      path: 'appointments',
+      component: () => import('@/views/appointment/index'),
+      name: 'MarkdownDemo',
+      meta: { title: 'Markdown' }
+    },
+    {
       path: 'markdown',
       component: () => import('@/views/components-demo/markdown'),
       name: 'MarkdownDemo',
