@@ -2,6 +2,7 @@
   <div class="app-container">
     <div class="filter-container">
       <el-input v-model="listQuery.name" placeholder="Name" style="width: 200px;" class="filter-item" @keyup.enter.native="handleFilter" />
+      <el-date-picker v-model="listQuery.schedule_time" type="datetime" format="yyyy-MM-dd HH:mm:ss" placeholder="Select date and time" />
       <el-select v-model="listQuery.status" placeholder="Status" clearable style="width: 90px" class="filter-item">
         <el-option v-for="item in statusOptions" :key="item" :label="item" :value="item" />
       </el-select>
@@ -123,6 +124,7 @@ import { fetchAppointmentSerials, updateAppointmentSerial, createAppointmentSeri
 import waves from '@/directive/waves' // waves directive
 import { parseTime } from '@/utils'
 import Pagination from '@/components/Pagination' // secondary package based on el-pagination
+import moment from 'moment'
 
 export default {
   name: 'ComplexTable',
@@ -199,7 +201,13 @@ export default {
     },
     handleFilter() {
       this.listQuery.page = 1
+      if (this.listQuery.schedule_time !== 'Invalid date') {
+        // this.listQuery.schedule_time = this.backEndDateFormat(this.listQuery.schedule_time)
+      }
       this.getList()
+    },
+    backEndDateFormat: function(date) {
+      return moment(date, 'YYYY-MM-DD h:mm:ss').format('YYYY-MM-DD h:mm:ss')
     },
     resetData() {
       this.resetTemp()
