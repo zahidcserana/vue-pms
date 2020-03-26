@@ -6,6 +6,9 @@
       <el-select v-model="listQuery.status" placeholder="Status" clearable style="width: 90px" class="filter-item">
         <el-option v-for="item in statusOptions" :key="item" :label="item" :value="item" />
       </el-select>
+      <el-select v-model="listQuery.doctor_id" placeholder="Doctor" clearable style="width: 90px" class="filter-item">
+        <el-option v-for="item in doctors" :key="item.id" :label="item.name" :value="item.id" />
+      </el-select>
       <el-select v-model="listQuery.ordering" style="width: 140px" class="filter-item" @change="handleFilter">
         <el-option v-for="item in sortOptions" :key="item.key" :label="item.label" :value="item.key" />
       </el-select>
@@ -53,6 +56,11 @@
           <span>{{ row.schedule_time | parseTime('{y}-{m}-{d} {h}:{i}') }}</span>
         </template>
       </el-table-column>
+      <el-table-column label="Doctor" width="200px" align="center">
+        <template slot-scope="{row}">
+          <span>{{ row.doctor == null ? '' : row.doctor.name }}</span>
+        </template>
+      </el-table-column>
       <el-table-column label="Status" class-name="status-col" width="100">
         <template slot-scope="{row}">
           <el-tag :type="row.status | statusFilter">
@@ -91,6 +99,11 @@
         <el-form-item label="Mobile" prop="mobile">
           <el-input v-model="user.mobile" />
         </el-form-item>
+        <el-form-item label="Doctor" prop="doctor">
+          <el-select v-model="user.doctor_id" class="filter-item" placeholder="Please select">
+            <el-option v-for="item in doctors" :key="item.id" :label="item.name" :value="item.id" />
+          </el-select>
+        </el-form-item>
         <el-form-item label="Status">
           <el-select v-model="user.status" class="filter-item" placeholder="Please select">
             <el-option v-for="item in statusOptions" :key="item" :label="item" :value="item" />
@@ -121,6 +134,7 @@
 
 <script>
 import { fetchAppointmentSerials, updateAppointmentSerial, createAppointmentSerial } from '@/api/appointment'
+import { fetchDoctorList } from '@/api/doctor'
 import waves from '@/directive/waves' // waves directive
 import { parseTime } from '@/utils'
 import Pagination from '@/components/Pagination' // secondary package based on el-pagination
@@ -144,7 +158,7 @@ export default {
     return {
       tableKey: 0,
       list: null,
-      departments: null,
+      doctors: null,
       total: 0,
       listLoading: true,
       listQuery: {
@@ -154,6 +168,7 @@ export default {
         name: undefined,
         schedule_time: undefined,
         type: undefined,
+        doctor_id: undefined,
         ordering: '+id'
       },
       importanceOptions: [1, 2, 3],
@@ -165,6 +180,7 @@ export default {
         name: '',
         schedule_time: '',
         mobile: '',
+        doctor_id: '',
         status: 'ACTIVE'
       },
       dialogFormVisible: false,
@@ -184,7 +200,7 @@ export default {
   },
   created() {
     this.getList()
-    // this.departmentList()
+    this.doctorList()
   },
   methods: {
     getList() {
@@ -197,6 +213,11 @@ export default {
         setTimeout(() => {
           this.listLoading = false
         }, 1.5 * 1000)
+      })
+    },
+    doctorList() {
+      fetchDoctorList().then(response => {
+        this.doctors = response.data.items
       })
     },
     handleFilter() {
