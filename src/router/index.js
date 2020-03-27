@@ -205,6 +205,29 @@ export const asyncRoutes = [
     ]
   },
   {
+    path: '/doctors',
+    component: Layout,
+    redirect: '/doctors',
+    alwaysShow: true, // will always show the root menu
+    name: 'Doctor',
+    meta: {
+      title: 'Doctors',
+      icon: 'doctor',
+      roles: ['admin', 'editor'] // you can set roles in root nav
+    },
+    children: [
+      {
+        path: '',
+        component: () => import('@/views/doctor'),
+        name: 'Doctors',
+        meta: {
+          title: 'Doctor List',
+          roles: ['admin'] // or you can only set roles in sub nav
+        }
+      }
+    ]
+  },
+  {
     path: '/patients',
     component: Layout,
     redirect: '/patients',

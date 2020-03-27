@@ -9,24 +9,24 @@ export function fetchDoctorList(query) {
   })
 }
 
-export function updatePatient(data) {
+export function updateDoctor(data) {
   return request({
-    url: `${env.api_url}/patients/${data.id}/`,
+    url: `${env.api_url}/doctors/${data.id}/`,
     method: 'put',
     data
   })
 }
 
-export function patientInfo(id) {
+export function doctorInfo(id) {
   return request({
-    url: `${env.api_url}/patients/${id}/`,
+    url: `${env.api_url}/doctors/${id}/`,
     method: 'get'
   })
 }
 
-export function createPatient(data) {
+export function createDoctor(data) {
   return request({
-    url: `${env.api_url}/patients/`,
+    url: `${env.api_url}/doctors/`,
     method: 'post',
     data
   })
