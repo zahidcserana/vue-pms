@@ -2,12 +2,6 @@
   <div class="app-container">
     <div class="filter-container">
       <el-input v-model="listQuery.name" placeholder="Name" style="width: 200px;" class="filter-item" @keyup.enter.native="handleFilter" />
-      <el-select v-model="listQuery.status" placeholder="Status" clearable style="width: 90px" class="filter-item">
-        <el-option v-for="item in statusOptions" :key="item" :label="item" :value="item" />
-      </el-select>
-      <el-select v-model="listQuery.type" placeholder="Type" clearable class="filter-item" style="width: 130px">
-        <el-option v-for="item in userTypeOptions" :key="item.key" :label="item.display_name+'('+item.key+')'" :value="item.key" />
-      </el-select>
       <el-select v-model="listQuery.ordering" style="width: 140px" class="filter-item" @change="handleFilter">
         <el-option v-for="item in sortOptions" :key="item.key" :label="item.label" :value="item.key" />
       </el-select>
@@ -50,61 +44,28 @@
           <span>{{ row.mobile }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="Schedule Time" width="150px" align="center">
+      <el-table-column label="Doctor" width="200px" align="center">
         <template slot-scope="{row}">
-          <span>{{ row.schedule_time | parseTime('{y}-{m}-{d} {h}:{i}') }}</span>
+          <span>{{ row.doctor.name }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="Status" class-name="status-col" width="100">
+      <el-table-column label="Time" width="150px" align="center">
         <template slot-scope="{row}">
-          <el-tag :type="row.status | statusFilter">
-            {{ row.status }}
-          </el-tag>
+          <span>{{ row.created_at | parseTime('{y}-{m}-{d} {h}:{i}') }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="Actions" align="center" width="230" class-name="small-padding fixed-width">
-        <template slot-scope="{row}">
-          <el-button type="primary" size="mini" @click="handleUpdate(row)">
-            Edit
-          </el-button>
-          <el-button v-if="row.status!='ACTIVE'" size="mini" type="success" @click="handleModifyStatus(row,'ACTIVE')">
-            Active
-          </el-button>
-          <el-button v-if="row.status!='INACTIVE'" size="mini" @click="handleModifyStatus(row,'INACTIVE')">
-            Inactive
-          </el-button>
-          <el-button v-if="row.status!='DELETE'" size="mini" type="danger" @click="handleModifyStatus(row,'DELETE')">
-            Delete
-          </el-button>
+      <el-table-column align="center" label="Actions" width="120">
+        <template slot-scope="scope">
+          <router-link :to="'/appointment/edit/'+scope.row.id">
+            <el-button type="primary" size="small" icon="el-icon-edit">
+              Edit
+            </el-button>
+          </router-link>
         </template>
       </el-table-column>
     </el-table>
 
     <pagination v-show="total>0" :total="total" :page.sync="listQuery.page" :limit.sync="listQuery.limit" @pagination="getList" />
-
-    <el-dialog :title="textMap[dialogStatus]" :visible.sync="dialogFormVisible">
-      <el-form ref="dataForm" :rules="rules" :model="user" label-position="left" label-width="100px" style="width: 400px; margin-left:50px;">
-        <el-form-item label="Name" prop="name">
-          <el-input v-model="user.name" />
-        </el-form-item>
-        <el-form-item label="Mobile" prop="mobile">
-          <el-input v-model="user.mobile" />
-        </el-form-item>
-        <el-form-item label="Status">
-          <el-select v-model="user.status" class="filter-item" placeholder="Please select">
-            <el-option v-for="item in statusOptions" :key="item" :label="item" :value="item" />
-          </el-select>
-        </el-form-item>
-      </el-form>
-      <div slot="footer" class="dialog-footer">
-        <el-button @click="dialogFormVisible = false">
-          Cancel
-        </el-button>
-        <el-button type="primary" @click="dialogStatus==='create'?createData():updateData()">
-          Confirm
-        </el-button>
-      </div>
-    </el-dialog>
 
     <el-dialog :visible.sync="dialogPvVisible" title="Reading statistics">
       <el-table :data="pvData" border fit highlight-current-row style="width: 100%">
@@ -120,73 +81,37 @@
 
 <script>
 import { fetchPv } from '@/api/article'
-import { fetchAppointmentSerials, updateAppointmentSerial, createAppointmentSerial } from '@/api/appointment'
+import { fetchAppointments } from '@/api/appointment'
 import waves from '@/directive/waves' // waves directive
 import { parseTime } from '@/utils'
 import Pagination from '@/components/Pagination' // secondary package based on el-pagination
-
-const userTypeOptions = [
-  { key: 'REGULAR', display_name: 'Regular' },
-  { key: 'IRREGULAR', display_name: 'Irregular' }
-]
-
-// arr to obj, such as { CN : "China", US : "USA" }
-const userTypeKeyValue = userTypeOptions.reduce((acc, cur) => {
-  acc[cur.key] = cur.display_name
-  return acc
-}, {})
 
 export default {
   name: 'ComplexTable',
   components: { Pagination },
   directives: { waves },
-  filters: {
-    statusFilter(status) {
-      const statusMap = {
-        ACTIVE: 'success',
-        INACTIVE: 'info',
-        DELETE: 'danger'
-      }
-      return statusMap[status]
-    },
-    userTypeFilter(status) {
-      const statusMap = {
-        REGULAR: 'primary',
-        IRREGULAR: 'danger'
-      }
-      return statusMap[status]
-    },
-    typeFilter(type) {
-      return userTypeKeyValue[type]
-    }
-  },
   data() {
     return {
       tableKey: 0,
       list: null,
-      departments: null,
       total: 0,
       listLoading: true,
       listQuery: {
         page: 1,
         limit: 20,
-        status: undefined,
         name: undefined,
         email: undefined,
-        type: undefined,
         ordering: '+id'
       },
       importanceOptions: [1, 2, 3],
-      userTypeOptions,
       sortOptions: [{ label: 'ID Ascending', key: '+id' }, { label: 'ID Descending', key: '-id' }],
-      statusOptions: ['ACTIVE', 'CANCEL', 'ATTEND'],
       showReviewer: false,
       user: {
         id: undefined,
         name: '',
         email: '',
         mobile: '',
-        status: 'ACTIVE'
+        description: ''
       },
       dialogFormVisible: false,
       dialogStatus: '',
@@ -196,21 +121,16 @@ export default {
       },
       dialogPvVisible: false,
       pvData: [],
-      rules: {
-        type: [{ required: true, message: 'type is required', trigger: 'change' }],
-        name: [{ required: true, message: 'name is required', trigger: 'blur' }]
-      },
       downloadLoading: false
     }
   },
   created() {
     this.getList()
-    // this.departmentList()
   },
   methods: {
     getList() {
       this.listLoading = true
-      fetchAppointmentSerials(this.listQuery).then(response => {
+      fetchAppointments(this.listQuery).then(response => {
         this.list = response.data.items
         this.total = response.data.total
 
@@ -227,21 +147,6 @@ export default {
     resetData() {
       this.resetTemp()
       this.getList()
-    },
-    handleModifyStatus(row, status) {
-      console.log(status)
-      const statusData = { status: status, id: row.id }
-      updateAppointmentSerial(statusData).then(() => {
-        this.getList()
-        this.dialogFormVisible = false
-        this.$message({
-          message: 'Success',
-          type: 'success'
-        })
-        row.status = status
-      }).catch(e => {
-        console.log(e)
-      })
     },
     sortChange(data) {
       const { prop, order } = data
@@ -263,16 +168,13 @@ export default {
         name: '',
         email: '',
         mobile: '',
-        status: 'ACTIVE',
-        type: 'REGULAR'
+        description: ''
       }
       this.listQuery = {
         page: 1,
         limit: 20,
-        status: undefined,
         name: undefined,
         email: undefined,
-        type: undefined,
         ordering: '+id'
       }
     },
@@ -284,25 +186,6 @@ export default {
         this.$refs['dataForm'].clearValidate()
       })
     },
-    createData() {
-      this.$refs['dataForm'].validate((valid) => {
-        if (valid) {
-          const userData = Object.assign({}, this.user)
-          console.log(userData)
-          createAppointmentSerial(userData).then(() => {
-            this.getList()
-            // this.list.unshift(this.user)
-            this.dialogFormVisible = false
-            this.$notify({
-              title: 'Success',
-              message: 'Created Successfully',
-              type: 'success',
-              duration: 2000
-            })
-          })
-        }
-      })
-    },
     handleUpdate(row) {
       this.user = Object.assign({}, row) // copy obj
       this.dialogStatus = 'update'
@@ -310,34 +193,6 @@ export default {
       this.$nextTick(() => {
         this.$refs['dataForm'].clearValidate()
       })
-    },
-    updateData() {
-      this.$refs['dataForm'].validate((valid) => {
-        if (valid) {
-          const userData = Object.assign({}, this.user)
-          updateAppointmentSerial(userData).then(() => {
-            this.getList()
-            this.dialogFormVisible = false
-            this.$notify({
-              title: 'Success',
-              message: 'Update Successfully',
-              type: 'success',
-              duration: 2000
-            })
-          }).catch(e => {
-            console.log(e)
-          })
-        }
-      })
-    },
-    handleDelete(row, index) {
-      this.$notify({
-        title: 'Success',
-        message: 'Delete Successfully',
-        type: 'success',
-        duration: 2000
-      })
-      this.list.splice(index, 1)
     },
     handleFetchPv(pv) {
       fetchPv(pv).then(response => {

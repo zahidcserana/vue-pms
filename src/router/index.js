@@ -86,6 +86,77 @@ export const constantRoutes = [
     ]
   },
   {
+    path: '/users',
+    component: Layout,
+    redirect: '/users/list',
+    alwaysShow: true, // will always show the root menu
+    name: 'User',
+    meta: {
+      title: 'Users',
+      icon: 'user',
+      roles: ['admin', 'editor'] // you can set roles in root nav
+    },
+    children: [
+      {
+        path: 'list',
+        component: () => import('@/views/user/list'),
+        name: 'UserList',
+        meta: {
+          title: 'User List',
+          icon: 'list',
+          roles: ['admin'] // or you can only set roles in sub nav
+        }
+      }
+    ]
+  },
+  {
+    path: '/doctors',
+    component: Layout,
+    redirect: '/doctors',
+    name: 'Doctor',
+    meta: {
+      title: 'Doctors',
+      icon: 'example'
+    },
+    children: [
+      {
+        path: '',
+        component: () => import('@/views/doctor'),
+        name: 'DoctorList',
+        meta: { title: 'Doctor List', icon: 'guide' }
+      }
+    ]
+  },
+  {
+    path: '/patients',
+    component: Layout,
+    redirect: '/patients',
+    alwaysShow: true, // will always show the root menu
+    name: 'Patient',
+    meta: {
+      title: 'patients',
+      icon: 'peoples',
+      roles: ['admin', 'editor'] // you can set roles in root nav
+    },
+    children: [
+      {
+        path: '',
+        component: () => import('@/views/patient/list'),
+        name: 'PatientList',
+        meta: {
+          title: 'Patient List',
+          icon: 'list',
+          roles: ['admin'] // or you can only set roles in sub nav
+        }
+      },
+      {
+        path: 'edit/:id(\\d+)',
+        component: () => import('@/views/patient/profile')
+      }
+    ]
+  },
+  appointmentsRouter,
+  {
     path: '/documentation',
     component: Layout,
     children: [
@@ -173,94 +244,6 @@ export const asyncRoutes = [
     ]
   },
   {
-    path: '/users',
-    component: Layout,
-    redirect: '/users/list',
-    alwaysShow: true, // will always show the root menu
-    name: 'User',
-    meta: {
-      title: 'Users',
-      icon: 'user',
-      roles: ['admin', 'editor'] // you can set roles in root nav
-    },
-    children: [
-      {
-        path: 'list',
-        component: () => import('@/views/user/list'),
-        name: 'UserList',
-        meta: {
-          title: 'User List',
-          roles: ['admin'] // or you can only set roles in sub nav
-        }
-      },
-      {
-        path: 'directive',
-        component: () => import('@/views/permission/directive'),
-        name: 'DirectivePermission',
-        meta: {
-          title: 'New User'
-          // if do not set roles, means: this page does not require permission
-        }
-      }
-    ]
-  },
-  {
-    path: '/doctors',
-    component: Layout,
-    redirect: '/doctors',
-    alwaysShow: true, // will always show the root menu
-    name: 'Doctor',
-    meta: {
-      title: 'Doctors',
-      icon: 'doctor',
-      roles: ['admin', 'editor'] // you can set roles in root nav
-    },
-    children: [
-      {
-        path: '',
-        component: () => import('@/views/doctor'),
-        name: 'Doctors',
-        meta: {
-          title: 'Doctor List',
-          roles: ['admin'] // or you can only set roles in sub nav
-        }
-      }
-    ]
-  },
-  {
-    path: '/patients',
-    component: Layout,
-    redirect: '/patients',
-    alwaysShow: true, // will always show the root menu
-    name: 'Patient',
-    meta: {
-      title: 'patients',
-      icon: 'peoples',
-      roles: ['admin', 'editor'] // you can set roles in root nav
-    },
-    children: [
-      {
-        path: '',
-        component: () => import('@/views/patient/list'),
-        name: 'PatientList',
-        meta: {
-          title: 'Patient List',
-          roles: ['admin'] // or you can only set roles in sub nav
-        }
-      },
-      {
-        path: 'edit/:id(\\d+)',
-        component: () => import('@/views/patient/profile'),
-        name: 'Patient',
-        meta: {
-          title: 'Patient View'
-          // if do not set roles, means: this page does not require permission
-        }
-      }
-    ]
-  },
-
-  {
     path: '/icon',
     component: Layout,
     children: [
@@ -274,43 +257,9 @@ export const asyncRoutes = [
   },
 
   /** when your routing map is too long, you can split it into small modules **/
-  appointmentsRouter,
   chartsRouter,
   nestedRouter,
   tableRouter,
-
-  {
-    path: '/example',
-    component: Layout,
-    redirect: '/example/list',
-    name: 'Example',
-    meta: {
-      title: 'Doctors',
-      icon: 'example'
-    },
-    children: [
-      {
-        path: 'create',
-        component: () => import('@/views/example/create'),
-        name: 'CreateArticle',
-        meta: { title: 'Create Article', icon: 'edit' }
-      },
-      {
-        path: 'edit/:id(\\d+)',
-        component: () => import('@/views/example/edit'),
-        name: 'EditArticle',
-        meta: { title: 'Edit Article', noCache: true, activeMenu: '/example/list' },
-        hidden: true
-      },
-      {
-        path: 'list',
-        component: () => import('@/views/example/list'),
-        name: 'ArticleList',
-        meta: { title: 'Article List', icon: 'list' }
-      }
-    ]
-  },
-
   {
     path: '/tab',
     component: Layout,

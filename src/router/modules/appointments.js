@@ -3,7 +3,7 @@
 import Layout from '@/layout'
 
 const appointmentsRouter = {
-  path: '/components',
+  path: '/appointment',
   component: Layout,
   redirect: 'noRedirect',
   name: 'ComponentDemo',
@@ -13,16 +13,29 @@ const appointmentsRouter = {
   },
   children: [
     {
-      path: 'appointments',
+      path: 'serial',
       component: () => import('@/views/appointment/serials'),
       name: 'Serial',
-      meta: { title: 'Serial' }
+      meta: { title: 'Serial', icon: 'link' }
     },
     {
-      path: 'markdown',
-      component: () => import('@/views/components-demo/markdown'),
-      name: 'MarkdownDemo',
-      meta: { title: 'Markdown' }
+      path: '',
+      component: () => import('@/views/appointment'),
+      name: 'Appointment',
+      meta: { title: 'Appointment', icon: 'list' }
+    },
+    {
+      path: 'create',
+      component: () => import('@/views/appointment/create'),
+      name: 'CreateAppointment',
+      meta: { title: 'Create Appointment', icon: 'edit' }
+    },
+    {
+      path: 'edit/:id(\\d+)',
+      component: () => import('@/views/appointment/edit'),
+      name: 'EditAppointment',
+      meta: { title: 'Edit Appointment', noCache: true, activeMenu: '/appointment' },
+      hidden: true
     },
     {
       path: 'json-editor',
