@@ -8,14 +8,14 @@
               <el-row>
                 <el-col :span="10">
                   <el-form-item label-width="60px" label="Doctor:" class="postInfo-container-item">
-                    <el-select v-model="postForm.doctor_id" :remote-method="getRemoteUserList" filterable default-first-option remote placeholder="Search doctor">
+                    <el-select v-model="postForm.doctor_id" :remote-method="getRemoteUserList" filterable default-first-option remote placeholder="Search doctor" :disabled="is_disabled">
                       <el-option v-for="(item,index) in doctorListOptions" :key="item+index" :label="item.name" :value="item.id" />
                     </el-select>
                   </el-form-item>
                 </el-col>
                 <el-col :span="10">
                   <el-form-item label-width="60px" label="Patient:" class="postInfo-container-item">
-                    <el-select v-model="postForm.patient_id" :remote-method="getRemotePatientList" filterable default-first-option remote placeholder="Search patient">
+                    <el-select v-model="postForm.patient_id" :remote-method="getRemotePatientList" filterable default-first-option remote placeholder="Search patient" :disabled="is_disabled">
                       <el-option v-for="(item,index) in patientListOptions" :key="item+index" :label="item.name" :value="item.id" />
                     </el-select>
                   </el-form-item>
@@ -30,7 +30,7 @@
         <el-row>
           <el-col :span="8">
             <el-form-item style="margin-bottom: 40px;" prop="title">
-              <MDinput v-model="postForm.name" :maxlength="100" name="name" required>
+              <MDinput v-model="postForm.name" :maxlength="100" name="name" required :readonly="is_readonly">
                 Name
               </MDinput>
             </el-form-item>
@@ -38,7 +38,7 @@
           <el-col :span="2"> &nbsp;</el-col>
           <el-col :span="8">
             <el-form-item style="margin-bottom: 40px;" prop="title">
-              <MDinput v-model="postForm.mobile" :maxlength="100" name="mobile" required>
+              <MDinput v-model="postForm.mobile" :maxlength="100" name="mobile" required :readonly="is_readonly">
                 Mobile
               </MDinput>
             </el-form-item>
@@ -47,12 +47,27 @@
         <el-form-item prop="content" style="margin-bottom: 30px;">
           <Tinymce ref="editor" v-model="postForm.description" :height="400" />
         </el-form-item>
-
-        <el-form-item prop="image_uri" style="margin-bottom: 30px;">
+        <el-form-item v-show="!isDocImage" prop="image_uri" style="margin-bottom: 30px;">
           <Upload v-model="postForm.doc_image" />
         </el-form-item>
-        <el-form-item prop="image_uri" style="margin-bottom: 30px;">
+        <el-form-item v-show="!isDocFile" prop="image_uri" style="margin-bottom: 30px;">
           <Upload v-model="postForm.doc_file" />
+        </el-form-item>
+        <el-form-item prop="image_uri" style="margin-bottom: 30px;">
+          <a v-show="isDocImage" :href="postForm.doc_image" target="_blank">
+            <div class="image-preview image-app-preview">
+              <div class="image-preview-wrapper">
+                <img :src="postForm.doc_image">
+              </div>
+            </div>
+          </a>
+          <a v-show="isDocFile" :href="postForm.doc_file" target="_blank">
+            <div class="image-preview image-app-preview">
+              <div class="image-preview-wrapper">
+                <img :src="postForm.doc_file">
+              </div>
+            </div>
+          </a>
         </el-form-item>
       </div>
     </el-form>
@@ -63,16 +78,16 @@
 import Tinymce from '@/components/Tinymce'
 import Upload from '@/components/Upload/SingleImage3'
 import MDinput from '@/components/MDinput'
-import { fetchArticle } from '@/api/article'
+import { getAppointment, createAppointment, updateAppointment } from '@/api/appointment'
 import { searchDoctor, searchPatient } from '@/api/remote-search'
-import { createAppointment } from '@/api/appointment'
+import { env } from '@/utils'
 
 const defaultForm = {
   name: '',
-  doc_image: '',
+  doc_image: undefined,
+  doc_file: undefined,
   description: '',
   mobile: '',
-  doc_file: '',
   patient_id: '',
   doctor_id: '',
   id: undefined
@@ -100,6 +115,10 @@ export default {
       }
     }
     return {
+      isDocImage: false,
+      isDocFile: false,
+      is_readonly: false,
+      is_disabled: false,
       postForm: Object.assign({}, defaultForm),
       loading: false,
       doctorListOptions: [],
@@ -109,7 +128,13 @@ export default {
         name: [{ validator: validateRequire }],
         description: [{ validator: validateRequire }]
       },
-      tempRoute: {}
+      tempRoute: {},
+      updateInput: {
+        id: undefined,
+        description: '',
+        doc_image: '',
+        doc_file: ''
+      }
     }
   },
   computed: {
@@ -142,18 +167,32 @@ export default {
   },
   methods: {
     fetchData(id) {
-      fetchArticle(id).then(response => {
+      getAppointment(id).then(response => {
         this.postForm = response.data
-
-        // just for test
-        this.postForm.title += `   Article Id:${this.postForm.id}`
-        this.postForm.content_short += `   Article Id:${this.postForm.id}`
+        this.postForm.doctor_id = response.data.doctor.name
+        this.postForm.patient_id = response.data.patient.name
+        if (response.data.doc_image !== null) {
+          this.isDocImage = true
+          this.postForm.doc_image = env.api_url + response.data.doc_image
+        } else {
+          this.postForm.doc_image = undefined
+        }
+        if (response.data.doc_file !== null) {
+          this.isDocFile = true
+          this.postForm.doc_file = env.api_url + response.data.doc_file
+        } else {
+          this.postForm.doc_file = undefined
+        }
+        this.postForm.title += `   Appointment Id:${this.postForm.id}`
+        this.postForm.content_short += `   Appointment Id:${this.postForm.id}`
 
         // set tagsview title
         this.setTagsViewTitle()
 
         // set page title
         this.setPageTitle()
+        this.is_readonly = true
+        this.is_disabled = true
       }).catch(err => {
         console.log(err)
       })
@@ -174,14 +213,29 @@ export default {
           this.loading = true
           const userData = Object.assign({}, this.postForm)
           console.log(userData)
-          createAppointment(userData).then(() => {
-            this.$notify({
-              title: 'Success',
-              message: 'Created Successfully',
-              type: 'success',
-              duration: 2000
+          if (userData.id > 0) {
+            this.updateInput.id = userData.id
+            this.updateInput.description = userData.description
+            this.updateInput.doc_image = userData.doc_image
+            this.updateInput.doc_file = userData.doc_file
+            updateAppointment(this.updateInput).then(() => {
+              this.$notify({
+                title: 'Success',
+                message: 'Updated Successfully',
+                type: 'success',
+                duration: 2000
+              })
             })
-          })
+          } else {
+            createAppointment(userData).then(() => {
+              this.$notify({
+                title: 'Success',
+                message: 'Created Successfully',
+                type: 'success',
+                duration: 2000
+              })
+            })
+          }
           this.loading = false
           // this.loading = true
           // this.$notify({
@@ -266,6 +320,40 @@ export default {
     border: none;
     border-radius: 0px;
     border-bottom: 1px solid #bfcbd9;
+  }
+}
+
+.image-preview {
+  width: 200px;
+  height: 200px;
+  position: relative;
+  border: 1px dashed #d9d9d9;
+  float: left;
+  margin-left: 50px;
+  .image-preview-wrapper {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    img {
+      width: 100%;
+      height: 100%;
+    }
+  }
+}
+.image-app-preview {
+  width: 320px;
+  height: 180px;
+  position: relative;
+  border: 1px dashed #d9d9d9;
+  float: left;
+  margin-left: 50px;
+  .app-fake-conver {
+    height: 44px;
+    position: absolute;
+    width: 100%; // background: rgba(0, 0, 0, .1);
+    text-align: center;
+    line-height: 64px;
+    color: #fff;
   }
 }
 </style>
