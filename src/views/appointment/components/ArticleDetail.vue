@@ -15,7 +15,7 @@
                 </el-col>
                 <el-col :span="10">
                   <el-form-item label-width="60px" label="Patient:" class="postInfo-container-item">
-                    <el-select v-model="postForm.patient_id" :remote-method="getRemotePatientList" filterable default-first-option remote placeholder="Search patient" :disabled="is_disabled">
+                    <el-select v-model="postForm.patient_id" :remote-method="getRemotePatientList" filterable default-first-option remote placeholder="Search patient" :disabled="is_disabled" @change="onChange($event)">
                       <el-option v-for="(item,index) in patientListOptions" :key="item+index" :label="item.name" :value="item.id" />
                     </el-select>
                   </el-form-item>
@@ -79,7 +79,7 @@ import Tinymce from '@/components/Tinymce'
 import Upload from '@/components/Upload/SingleImage3'
 import MDinput from '@/components/MDinput'
 import { getAppointment, createAppointment, updateAppointment } from '@/api/appointment'
-import { searchDoctor, searchPatient } from '@/api/remote-search'
+import { searchDoctor, defaultDoctor, searchPatient } from '@/api/remote-search'
 import { env } from '@/utils'
 
 const defaultForm = {
@@ -94,7 +94,7 @@ const defaultForm = {
 }
 
 export default {
-  name: 'ArticleDetail',
+  name: 'AppointmentDetail',
   components: { Tinymce, MDinput, Upload },
   props: {
     isEdit: {
@@ -115,6 +115,7 @@ export default {
       }
     }
     return {
+      defaultDoctorId: 1,
       isDocImage: false,
       isDocFile: false,
       is_readonly: false,
@@ -132,8 +133,8 @@ export default {
       updateInput: {
         id: undefined,
         description: '',
-        doc_image: '',
-        doc_file: ''
+        doc_image: undefined,
+        doc_file: undefined
       }
     }
   },
@@ -158,6 +159,8 @@ export default {
     if (this.isEdit) {
       const id = this.$route.params && this.$route.params.id
       this.fetchData(id)
+    } else {
+      this.getDefaultDoctor(this.defaultDoctorId)
     }
 
     // Why need to make a copy of this.$route here?
@@ -166,6 +169,11 @@ export default {
     this.tempRoute = Object.assign({}, this.$route)
   },
   methods: {
+    onChange(userId) {
+      const patientInfo = this.patientListOptions.find(m => m.id === userId)
+      this.postForm.name = patientInfo.name
+      this.postForm.mobile = patientInfo.mobile
+    },
     fetchData(id) {
       getAppointment(id).then(response => {
         this.postForm = response.data
@@ -198,26 +206,24 @@ export default {
       })
     },
     setTagsViewTitle() {
-      const title = 'Edit Article'
+      const title = 'Edit Appointment'
       const route = Object.assign({}, this.tempRoute, { title: `${title}-${this.postForm.id}` })
       this.$store.dispatch('tagsView/updateVisitedView', route)
     },
     setPageTitle() {
-      const title = 'Edit Article'
+      const title = 'Edit Appointment'
       document.title = `${title} - ${this.postForm.id}`
     },
     submitForm() {
-      console.log(this.postForm)
       this.$refs.postForm.validate(valid => {
         if (valid) {
           this.loading = true
           const userData = Object.assign({}, this.postForm)
-          console.log(userData)
           if (userData.id > 0) {
             this.updateInput.id = userData.id
             this.updateInput.description = userData.description
-            this.updateInput.doc_image = userData.doc_image
-            this.updateInput.doc_file = userData.doc_file
+            this.updateInput.doc_file = this.isDocFile ? undefined : userData.doc_file
+            this.updateInput.doc_image = this.isDocImage ? undefined : userData.doc_image
             updateAppointment(this.updateInput).then(() => {
               this.$notify({
                 title: 'Success',
@@ -227,52 +233,34 @@ export default {
               })
             })
           } else {
-            createAppointment(userData).then(() => {
+            createAppointment(userData).then((res) => {
               this.$notify({
                 title: 'Success',
                 message: 'Created Successfully',
                 type: 'success',
                 duration: 2000
               })
+              this.$router.push({ path: `/appointment/edit/${res.data.id}` })
             })
           }
           this.loading = false
-          // this.loading = true
-          // this.$notify({
-          //   title: '成功',
-          //   message: '发布文章成功',
-          //   type: 'success',
-          //   duration: 2000
-          // })
-          // this.postForm.status = 'published'
-          // this.loading = false
         } else {
-          console.log('error submit!!')
           return false
         }
       })
-    },
-    draftForm() {
-      if (this.postForm.content.length === 0 || this.postForm.title.length === 0) {
-        this.$message({
-          message: '请填写必要的标题和内容',
-          type: 'warning'
-        })
-        return
-      }
-      this.$message({
-        message: '保存成功',
-        type: 'success',
-        showClose: true,
-        duration: 1000
-      })
-      this.postForm.status = 'draft'
     },
     getRemoteUserList(query) {
       searchDoctor(query).then(response => {
         if (!response.data.items) return
         this.doctorListOptions = response.data.items
         // this.doctorListOptions = response.data.items.map(v => v.name)
+      })
+    },
+    getDefaultDoctor(id) {
+      defaultDoctor(id).then(response => {
+        if (!response.data) return
+        this.doctorListOptions = response.data.items
+        this.postForm.doctor_id = id
       })
     },
     getRemotePatientList(query) {

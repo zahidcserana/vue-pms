@@ -24,6 +24,13 @@ export function searchDoctor(name) {
     params: { name }
   })
 }
+export function defaultDoctor(id) {
+  return request({
+    url: `${env.api_url}/doctors/`,
+    method: 'get',
+    params: { id }
+  })
+}
 
 export function transactionList(query) {
   return request({

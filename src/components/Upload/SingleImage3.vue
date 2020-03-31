@@ -11,7 +11,7 @@
     >
       <i class="el-icon-upload" />
       <div class="el-upload__text">
-        将文件拖到此处，或<em>点击上传</em>
+        Drag files here，or <em>click upload</em>
       </div>
     </el-upload>
     <div class="image-preview image-app-preview">
