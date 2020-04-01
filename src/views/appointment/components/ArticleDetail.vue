@@ -16,7 +16,7 @@
                 <el-col :span="10">
                   <el-form-item label-width="60px" label="Patient:" class="postInfo-container-item">
                     <el-select v-model="postForm.patient_id" :remote-method="getRemotePatientList" filterable default-first-option remote placeholder="Search patient" :disabled="is_disabled" @change="onChange($event)">
-                      <el-option v-for="(item,index) in patientListOptions" :key="item+index" :label="item.name" :value="item.id" />
+                      <el-option v-for="(item,index) in patientListOptions" :key="item+index" :label="item.name + ' (' + item.mobile + ')'" :value="item.id" />
                     </el-select>
                   </el-form-item>
                 </el-col>
@@ -265,8 +265,8 @@ export default {
     },
     getRemotePatientList(query) {
       searchPatient(query).then(response => {
-        if (!response.data.items) return
-        this.patientListOptions = response.data.items
+        if (!response.data) return
+        this.patientListOptions = response.data
       })
     }
   }

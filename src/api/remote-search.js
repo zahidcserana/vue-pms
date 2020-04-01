@@ -9,11 +9,11 @@ export function searchUser(name) {
   })
 }
 
-export function searchPatient(name) {
+export function searchPatient(search) {
   return request({
-    url: `${env.api_url}/patients/`,
+    url: `${env.api_url}/patient-search/`,
     method: 'get',
-    params: { name }
+    params: { search }
   })
 }
 
