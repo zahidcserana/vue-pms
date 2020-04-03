@@ -6,6 +6,9 @@
       <el-select v-model="listQuery.status" placeholder="Status" clearable style="width: 90px" class="filter-item">
         <el-option v-for="item in statusOptions" :key="item" :label="item" :value="item" />
       </el-select>
+      <el-select v-model="listQuery.gender" placeholder="Gender" clearable class="filter-item" style="width: 130px">
+        <el-option v-for="item in genderOptions" :key="item.key" :label="item.display_name" :value="item.key" />
+      </el-select>
       <el-select v-model="listQuery.type" placeholder="Type" clearable class="filter-item" style="width: 130px">
         <el-option v-for="item in userTypeOptions" :key="item.key" :label="item.display_name+'('+item.key+')'" :value="item.key" />
       </el-select>
@@ -63,6 +66,13 @@
           <span>{{ row.created_at | parseTime('{y}-{m}-{d} {h}:{i}') }}</span>
         </template>
       </el-table-column>
+      <el-table-column label="Gender" class-name="status-col" width="100">
+        <template slot-scope="{row}">
+          <el-tag :type="row.gender | genderFilter">
+            {{ row.gender }}
+          </el-tag>
+        </template>
+      </el-table-column>
       <el-table-column label="Type" class-name="status-col" width="100">
         <template slot-scope="{row}">
           <el-tag :type="row.type | userTypeFilter">
@@ -102,6 +112,11 @@
         <el-form-item label="Type" prop="type">
           <el-select v-model="user.type" class="filter-item" placeholder="Please select">
             <el-option v-for="item in userTypeOptions" :key="item.key" :label="item.display_name" :value="item.key" />
+          </el-select>
+        </el-form-item>
+        <el-form-item label="Gender" prop="gender">
+          <el-select v-model="user.gender" class="filter-item" placeholder="Please select">
+            <el-option v-for="item in genderOptions" :key="item.key" :label="item.display_name" :value="item.key" />
           </el-select>
         </el-form-item>
         <el-form-item label="Name" prop="name">
@@ -152,6 +167,10 @@ const userTypeOptions = [
   { key: 'REGULAR', display_name: 'Regular' },
   { key: 'IRREGULAR', display_name: 'Irregular' }
 ]
+const genderOptions = [
+  { key: 'MALE', display_name: 'Male' },
+  { key: 'FEMALE', display_name: 'Female' }
+]
 
 // arr to obj, such as { CN : "China", US : "USA" }
 const userTypeKeyValue = userTypeOptions.reduce((acc, cur) => {
@@ -179,6 +198,13 @@ export default {
       }
       return statusMap[status]
     },
+    genderFilter(status) {
+      const statusMap = {
+        MALE: 'primary',
+        FEMALE: 'danger'
+      }
+      return statusMap[status]
+    },
     typeFilter(type) {
       return userTypeKeyValue[type]
     }
@@ -197,10 +223,12 @@ export default {
         name: undefined,
         email: undefined,
         type: undefined,
+        gender: undefined,
         ordering: '+id'
       },
       importanceOptions: [1, 2, 3],
       userTypeOptions,
+      genderOptions,
       sortOptions: [{ label: 'ID Ascending', key: '+id' }, { label: 'ID Descending', key: '-id' }],
       statusOptions: ['ACTIVE', 'INACTIVE', 'DELETE'],
       showReviewer: false,
@@ -208,8 +236,11 @@ export default {
         id: undefined,
         name: '',
         email: '',
+        age: '',
+        address: '',
         mobile: '',
         type: 'REGULAR',
+        gender: 'MALE',
         status: 'ACTIVE'
       },
       dialogFormVisible: false,
@@ -287,7 +318,10 @@ export default {
         name: '',
         email: '',
         mobile: '',
+        age: '',
+        address: '',
         status: 'ACTIVE',
+        gender: 'MALE',
         type: 'REGULAR'
       }
       this.listQuery = {

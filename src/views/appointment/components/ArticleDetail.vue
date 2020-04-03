@@ -30,16 +30,32 @@
         <el-row>
           <el-col :span="8">
             <el-form-item style="margin-bottom: 40px;" prop="title">
+              <MDinput v-model="postForm.problem" :maxlength="100" name="age" required :readonly="is_readonly">
+                Problem
+              </MDinput>
+            </el-form-item>
+          </el-col>
+          <el-col :span="1">&nbsp;</el-col>
+          <el-col :span="5">
+            <el-form-item style="margin-bottom: 40px;" prop="title">
               <MDinput v-model="postForm.name" :maxlength="100" name="name" required :readonly="is_readonly">
                 Name
               </MDinput>
             </el-form-item>
           </el-col>
-          <el-col :span="2"> &nbsp;</el-col>
-          <el-col :span="8">
+          <el-col :span="1">&nbsp;</el-col>
+          <el-col :span="5">
             <el-form-item style="margin-bottom: 40px;" prop="title">
               <MDinput v-model="postForm.mobile" :maxlength="100" name="mobile" required :readonly="is_readonly">
                 Mobile
+              </MDinput>
+            </el-form-item>
+          </el-col>
+          <el-col :span="1">&nbsp;</el-col>
+          <el-col :span="3">
+            <el-form-item style="margin-bottom: 40px;" prop="title">
+              <MDinput v-model="postForm.age" :maxlength="100" name="age" required :readonly="is_readonly">
+                Age
               </MDinput>
             </el-form-item>
           </el-col>
@@ -84,9 +100,11 @@ import { env } from '@/utils'
 
 const defaultForm = {
   name: '',
+  age: '',
   doc_image: undefined,
   doc_file: undefined,
   description: '',
+  problem: '',
   mobile: '',
   patient_id: '',
   doctor_id: '',
@@ -106,10 +124,10 @@ export default {
     const validateRequire = (rule, value, callback) => {
       if (value === '') {
         this.$message({
-          message: rule.field + '为必传项',
+          message: rule.field + 'Required',
           type: 'error'
         })
-        callback(new Error(rule.field + '为必传项'))
+        callback(new Error(rule.field + 'Required'))
       } else {
         callback()
       }
@@ -173,6 +191,7 @@ export default {
       const patientInfo = this.patientListOptions.find(m => m.id === userId)
       this.postForm.name = patientInfo.name
       this.postForm.mobile = patientInfo.mobile
+      this.postForm.age = patientInfo.age
     },
     fetchData(id) {
       getAppointment(id).then(response => {

@@ -58,6 +58,14 @@ export function getAppointment(id) {
   })
 }
 
+export function getPatientAppointments(search) {
+  return request({
+    url: `${env.api_url}/patient-appointments/`,
+    method: 'get',
+    params: { search }
+  })
+}
+
 export function createAppointment(data) {
   return request({
     url: `${env.api_url}/${resource}/`,

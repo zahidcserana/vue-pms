@@ -1,7 +1,11 @@
 <template>
   <div class="app-container">
     <div class="filter-container">
+      <el-input v-model="listQuery.reference_mobile" placeholder="Reference Mobile" style="width: 200px;" class="filter-item" @keyup.enter.native="handleFilter" />
       <el-input v-model="listQuery.name" placeholder="Name" style="width: 200px;" class="filter-item" @keyup.enter.native="handleFilter" />
+      <el-input v-model="listQuery.mobile" placeholder="Mobile" style="width: 200px;" class="filter-item" @keyup.enter.native="handleFilter" />
+      <el-date-picker v-model="listQuery.date_from" type="date" format="yyyy-MM-dd" placeholder="Date From" />
+      <el-date-picker v-model="listQuery.date_to" type="date" format="yyyy-MM-dd" placeholder="Date To" />
       <el-select v-model="listQuery.ordering" style="width: 140px" class="filter-item" @change="handleFilter">
         <el-option v-for="item in sortOptions" :key="item.key" :label="item.label" :value="item.key" />
       </el-select>
@@ -34,9 +38,23 @@
           <span>{{ row.id }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="Name" width="200px">
+      <el-table-column label="Time" width="150px" align="center">
         <template slot-scope="{row}">
-          <span class="link-type" @click="handleUpdate(row)">{{ row.name }}</span>
+          <span>{{ row.created_at | parseTime('{y}-{m}-{d} {h}:{i}') }}</span>
+        </template>
+      </el-table-column>
+      <el-table-column label="Patient Reference" width="200px">
+        <template slot-scope="{row}">
+          <router-link :to="'/patients/edit/'+row.patient.id" class="link-type">
+            <span> {{ row.patient.name }} ({{ row.patient.mobile }}) </span>
+          </router-link>
+        </template>
+      </el-table-column>
+      <el-table-column label="Patient Name" width="200px">
+        <template slot-scope="{row}">
+          <router-link :to="'/appointment/edit/'+row.id" class="link-type">
+            <span>{{ row.name }}</span>
+          </router-link>
         </template>
       </el-table-column>
       <el-table-column label="Mobile" width="200px" align="center">
@@ -44,14 +62,14 @@
           <span>{{ row.mobile }}</span>
         </template>
       </el-table-column>
+      <el-table-column label="Gender" width="200px" align="center">
+        <template slot-scope="{row}">
+          <span>{{ row.gender }}</span>
+        </template>
+      </el-table-column>
       <el-table-column label="Doctor" width="200px" align="center">
         <template slot-scope="{row}">
           <span>{{ row.doctor.name }}</span>
-        </template>
-      </el-table-column>
-      <el-table-column label="Time" width="150px" align="center">
-        <template slot-scope="{row}">
-          <span>{{ row.created_at | parseTime('{y}-{m}-{d} {h}:{i}') }}</span>
         </template>
       </el-table-column>
       <el-table-column align="center" label="Actions" width="120">
@@ -85,6 +103,7 @@ import { fetchAppointments } from '@/api/appointment'
 import waves from '@/directive/waves' // waves directive
 import { parseTime } from '@/utils'
 import Pagination from '@/components/Pagination' // secondary package based on el-pagination
+import moment from 'moment'
 
 export default {
   name: 'ComplexTable',
@@ -100,7 +119,10 @@ export default {
         page: 1,
         limit: 20,
         name: undefined,
-        email: undefined,
+        mobile: undefined,
+        reference_mobile: undefined,
+        date_from: undefined,
+        date_to: undefined,
         ordering: '+id'
       },
       importanceOptions: [1, 2, 3],
@@ -109,7 +131,6 @@ export default {
       user: {
         id: undefined,
         name: '',
-        email: '',
         mobile: '',
         description: ''
       },
@@ -130,6 +151,12 @@ export default {
   methods: {
     getList() {
       this.listLoading = true
+      if (this.listQuery.date_from) {
+        this.listQuery.date_from = this.backEndDateFormat(this.listQuery.date_from)
+      }
+      if (this.listQuery.date_to) {
+        this.listQuery.date_to = this.backEndDateFormat(this.listQuery.date_to)
+      }
       fetchAppointments(this.listQuery).then(response => {
         this.list = response.data.items
         this.total = response.data.total
@@ -139,6 +166,9 @@ export default {
           this.listLoading = false
         }, 1.5 * 1000)
       })
+    },
+    backEndDateFormat: function(date) {
+      return moment(date, 'YYYY-MM-DD h:mm:ss').format('YYYY-MM-DD')
     },
     handleFilter() {
       this.listQuery.page = 1
@@ -166,7 +196,6 @@ export default {
       this.user = {
         id: undefined,
         name: '',
-        email: '',
         mobile: '',
         description: ''
       }
@@ -174,25 +203,12 @@ export default {
         page: 1,
         limit: 20,
         name: undefined,
-        email: undefined,
+        mobile: undefined,
         ordering: '+id'
       }
     },
     handleCreate() {
-      this.resetTemp()
-      this.dialogStatus = 'create'
-      this.dialogFormVisible = true
-      this.$nextTick(() => {
-        this.$refs['dataForm'].clearValidate()
-      })
-    },
-    handleUpdate(row) {
-      this.user = Object.assign({}, row) // copy obj
-      this.dialogStatus = 'update'
-      this.dialogFormVisible = true
-      this.$nextTick(() => {
-        this.$refs['dataForm'].clearValidate()
-      })
+      this.$router.push({ path: `/appointment/create` })
     },
     handleFetchPv(pv) {
       fetchPv(pv).then(response => {
@@ -203,8 +219,8 @@ export default {
     handleDownload() {
       this.downloadLoading = true
       import('@/vendor/Export2Excel').then(excel => {
-        const tHeader = ['name', 'email', 'mobile', 'type', 'status']
-        const filterVal = ['name', 'email', 'mobile', 'type', 'status']
+        const tHeader = ['name', 'mobile', 'created_at']
+        const filterVal = ['name', 'mobile', 'created_at']
         const data = this.formatJson(filterVal)
         excel.export_json_to_excel({
           header: tHeader,

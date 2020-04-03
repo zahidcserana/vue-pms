@@ -14,7 +14,7 @@
                 <activity />
               </el-tab-pane>
               <el-tab-pane label="Timeline" name="timeline">
-                <timeline />
+                <timeline :timeline="timeline" />
               </el-tab-pane>
               <el-tab-pane label="Account" name="account">
                 <account :user="user" />
@@ -35,6 +35,7 @@ import Activity from './components/Activity'
 import Timeline from './components/Timeline'
 import Account from './components/Account'
 import { patientInfo } from '@/api/patient'
+import { getPatientAppointments } from '@/api/appointment'
 
 export default {
   name: 'Profile',
@@ -43,6 +44,7 @@ export default {
     return {
       loading: true,
       user: {},
+      timeline: {},
       activeTab: 'activity'
     }
   },
@@ -55,19 +57,26 @@ export default {
   },
   created() {
     this.getUser()
+    this.getAppointments()
   },
   methods: {
     getUser() {
       const id = this.$route.params && this.$route.params.id
       patientInfo(id).then(response => {
-        this.user = {
-          id: response.data.id,
-          name: response.data.name,
-          mobile: response.data.mobile,
-          role: this.roles.join(' | '),
-          email: response.data.email,
-          avatar: this.avatar
-        }
+        this.user = response.data
+        this.user.avatar = this.avatar
+        this.user.role = this.roles.join(' | ')
+        setTimeout(() => {
+          this.loading = false
+        }, 1.5 * 1000)
+      }).catch(e => {
+        console.log(e)
+      })
+    },
+    getAppointments() {
+      const id = this.$route.params && this.$route.params.id
+      getPatientAppointments(id).then(response => {
+        this.timeline = Object.assign({}, response.data)
         setTimeout(() => {
           this.loading = false
         }, 1.5 * 1000)

@@ -9,6 +9,12 @@
     <el-form-item label="Mobile">
       <el-input v-model.trim="user.mobile" />
     </el-form-item>
+    <el-form-item label="Age">
+      <el-input v-model.trim="user.age" />
+    </el-form-item>
+    <el-form-item label="Address">
+      <el-input v-model.trim="user.address" />
+    </el-form-item>
     <el-form-item>
       <el-button type="primary" @click="submit">Update</el-button>
     </el-form-item>
@@ -26,6 +32,10 @@ export default {
         return {
           name: '',
           mobile: '',
+          age: '',
+          address: '',
+          gender: '',
+          type: '',
           email: ''
         }
       }
