@@ -152,6 +152,16 @@ export const constantRoutes = [
       {
         path: 'edit/:id(\\d+)',
         component: () => import('@/views/patient/profile')
+      },
+      {
+        path: 'payments',
+        component: () => import('@/views/patient/payments'),
+        name: 'PaymentList',
+        meta: {
+          title: 'Payment List',
+          icon: 'money',
+          roles: ['admin'] // or you can only set roles in sub nav
+        }
       }
     ]
   },
