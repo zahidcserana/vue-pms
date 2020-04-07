@@ -10,6 +10,14 @@ export function fetchPaymentList(query) {
   })
 }
 
+export function getPatientPayments(search) {
+  return request({
+    url: `${env.api_url}/payment-search/`,
+    method: 'get',
+    params: { search }
+  })
+}
+
 export function updatePayment(data) {
   return request({
     url: `${env.api_url}/${model}/${data.id}/`,

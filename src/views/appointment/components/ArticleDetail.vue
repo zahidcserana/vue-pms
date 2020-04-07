@@ -20,8 +20,11 @@
                     </el-select>
                   </el-form-item>
                 </el-col>
-                <el-col :span="4">
+                <el-col :span="2">
                   <el-button v-loading="loading" style="margin-left: 10px;float:right" type="success" @click="submitForm"> Proceed </el-button>
+                </el-col>
+                <el-col :span="2">
+                  <el-button v-if="is_show" v-loading="loading" style="margin-left: 10px;float:right" type="info" @click="prescription"> Prescription </el-button>
                 </el-col>
               </el-row>
             </div>
@@ -30,21 +33,13 @@
         <el-row>
           <el-col :span="8">
             <el-form-item style="margin-bottom: 40px;" prop="title">
-              <MDinput v-model="postForm.problem" :maxlength="100" name="age" required :readonly="is_readonly">
-                Problem
-              </MDinput>
-            </el-form-item>
-          </el-col>
-          <el-col :span="1">&nbsp;</el-col>
-          <el-col :span="5">
-            <el-form-item style="margin-bottom: 40px;" prop="title">
               <MDinput v-model="postForm.name" :maxlength="100" name="name" required :readonly="is_readonly">
                 Name
               </MDinput>
             </el-form-item>
           </el-col>
           <el-col :span="1">&nbsp;</el-col>
-          <el-col :span="5">
+          <el-col :span="7">
             <el-form-item style="margin-bottom: 40px;" prop="title">
               <MDinput v-model="postForm.mobile" :maxlength="100" name="mobile" required :readonly="is_readonly">
                 Mobile
@@ -52,7 +47,7 @@
             </el-form-item>
           </el-col>
           <el-col :span="1">&nbsp;</el-col>
-          <el-col :span="3">
+          <el-col :span="7">
             <el-form-item style="margin-bottom: 40px;" prop="title">
               <MDinput v-model="postForm.age" :maxlength="100" name="age" required :readonly="is_readonly">
                 Age
@@ -60,9 +55,26 @@
             </el-form-item>
           </el-col>
         </el-row>
-        <el-form-item prop="content" style="margin-bottom: 30px;">
+        <el-row>
+          <el-col :span="11">
+            <el-form-item style="margin-bottom: 40px;" prop="title">
+              <MDinput v-model="postForm.problem" :maxlength="100" name="age" required>
+                Problem
+              </MDinput>
+            </el-form-item>
+          </el-col>
+          <el-col :span="1">&nbsp;</el-col>
+          <el-col :span="12">
+            <el-form-item style="margin-bottom: 40px;" prop="advice">
+              <MDinput v-model="postForm.advice" :maxlength="100" name="advice" required>
+                Advice
+              </MDinput>
+            </el-form-item>
+          </el-col>
+        </el-row>
+        <!-- <el-form-item prop="content" style="margin-bottom: 30px;">
           <Tinymce ref="editor" v-model="postForm.description" :height="400" />
-        </el-form-item>
+        </el-form-item> -->
         <el-form-item v-show="!isDocImage" prop="image_uri" style="margin-bottom: 30px;">
           <Upload v-model="postForm.doc_image" />
         </el-form-item>
@@ -87,16 +99,93 @@
         </el-form-item>
       </div>
     </el-form>
+    <el-form class="form-container">
+      <div class="createPost-main-container">
+        <el-row>
+          <el-col :span="1">&nbsp;</el-col>
+          <el-col :span="6" class="prescribedmedicine">
+            <div v-for="(item,index) in pDescription" :key="index">
+              <strong> <span> {{ index + 1 }}. {{ item.medicine | strippedContent }}</span> </strong> <br>
+              <span> &nbsp;&nbsp;&nbsp; {{ item.rule | strippedContent }}, {{ item.duration | strippedContent }}</span> <br>
+              <br>
+            </div>
+          </el-col>
+          <el-col :span="1">&nbsp;</el-col>
+          <el-col :span="6">
+            <el-form-item label="Medicine" prop="medicine">
+              <el-input v-model="descArr.medicine" />
+            </el-form-item>
+          </el-col>
+          <el-col :span="1">&nbsp;</el-col>
+          <el-col :span="2">
+            <el-form-item label="Rule" prop="rule">
+              <el-input v-model="descArr.rule" />
+            </el-form-item>
+          </el-col>
+          <el-col :span="1">&nbsp;</el-col>
+          <el-col :span="2">
+            <el-form-item label="Duration" prop="duration">
+              <el-input v-model="descArr.duration" @keyup.enter="submitDescription" />
+            </el-form-item>
+          </el-col>
+          <el-col :span="1">&nbsp;</el-col>
+          <el-col :span="2">
+            <el-button style="margin-top: 2%;" type="success" @click="submitDescription"> Submit </el-button>
+          </el-col>
+          <el-col :span="1">&nbsp;</el-col>
+        </el-row>
+      </div>
+    </el-form>
+    <el-dialog v-if="is_show" :title="textMap[dialogStatus]" :visible.sync="dialogFormVisible">
+      <template>
+        <el-row>
+          <el-col :span="12">
+            <span>{{ appointmentInfo.doctor.title }}</span> <br>
+            <span>{{ appointmentInfo.doctor.name }}</span> <br>
+            <span>{{ appointmentInfo.doctor.education }}, {{ appointmentInfo.doctor.experience }}</span>
+          </el-col>
+          <el-col :span="12">
+            <span>{{ appointmentInfo.doctor.organisation }}</span> <br>
+            <span>{{ appointmentInfo.doctor.location }}</span>
+          </el-col>
+        </el-row>
+        <hr>
+        <el-row>
+          <el-col :span="8">
+            <span>{{ appointmentInfo.problem }}</span> <br>
+          </el-col>
+          <el-col :span="16" class="vl">
+            <div v-for="(item,index) in pDescription" :key="index">
+              <strong> <span> {{ index + 1 }}. {{ item.medicine | strippedContent }}</span> </strong> <br>
+              <span> &nbsp;&nbsp;&nbsp; {{ item.rule | strippedContent }}, {{ item.duration | strippedContent }}</span> <br>
+              <br>
+            </div>
+          </el-col>
+        </el-row>
+        <el-row style="text-align: center;">
+          <span>Note: {{ appointmentInfo.advice }}</span> <br>
+        </el-row>
+      </template>
+      <div slot="footer" class="dialog-footer">
+        <el-button @click="dialogFormVisible = false">
+          Cancel
+        </el-button>
+        <el-button type="primary" @click="dialogStatus==='create'?createData():updateData()">
+          Confirm
+        </el-button>
+      </div>
+    </el-dialog>
   </div>
 </template>
 
 <script>
-import Tinymce from '@/components/Tinymce'
+// import Tinymce from '@/components/Tinymce'
 import Upload from '@/components/Upload/SingleImage3'
 import MDinput from '@/components/MDinput'
 import { getAppointment, createAppointment, updateAppointment } from '@/api/appointment'
 import { searchDoctor, defaultDoctor, searchPatient } from '@/api/remote-search'
 import { env } from '@/utils'
+import moment from 'moment'
 
 const defaultForm = {
   name: '',
@@ -105,6 +194,7 @@ const defaultForm = {
   doc_file: undefined,
   description: '',
   problem: '',
+  advice: '',
   mobile: '',
   patient_id: '',
   doctor_id: '',
@@ -113,7 +203,15 @@ const defaultForm = {
 
 export default {
   name: 'AppointmentDetail',
-  components: { Tinymce, MDinput, Upload },
+  components: { MDinput, Upload },
+  filters: {
+    strippedContent: function(string) {
+      return string.replace(/<\/?[^>]+>/ig, ' ')
+    },
+    dateFormat(date) {
+      return moment(String(date)).format('dddd, MMMM Do YYYY, hh:mm a')
+    }
+  },
   props: {
     isEdit: {
       type: Boolean,
@@ -133,24 +231,40 @@ export default {
       }
     }
     return {
+      appointmentInfo: {},
       defaultDoctorId: 1,
       isDocImage: false,
       isDocFile: false,
       is_readonly: false,
       is_disabled: false,
+      is_show: false,
       postForm: Object.assign({}, defaultForm),
       loading: false,
       doctorListOptions: [],
+      dialogFormVisible: false,
+      dialogStatus: '',
+      textMap: {
+        update: 'Prescription',
+        create: 'Create'
+      },
       patientListOptions: [],
+      pDescription: [],
       rules: {
         doc_image: [{ validator: validateRequire }],
         name: [{ validator: validateRequire }],
         description: [{ validator: validateRequire }]
       },
+      descArr: {
+        medicine: '',
+        rule: '',
+        duration: ''
+      },
       tempRoute: {},
       updateInput: {
         id: undefined,
         description: '',
+        problem: '',
+        advice: '',
         doc_image: undefined,
         doc_file: undefined
       }
@@ -173,6 +287,15 @@ export default {
       }
     }
   },
+  mounted() {
+    // if (localStorage.getItem('pDescription')) {
+    //   try {
+    //     this.pDescription = JSON.parse(localStorage.getItem('pDescription'))
+    //   } catch (e) {
+    //     localStorage.removeItem('pDescription')
+    //   }
+    // }
+  },
   created() {
     if (this.isEdit) {
       const id = this.$route.params && this.$route.params.id
@@ -187,6 +310,15 @@ export default {
     this.tempRoute = Object.assign({}, this.$route)
   },
   methods: {
+    submitDescription: function() {
+      if (!this.descArr.medicine) {
+        return
+      }
+      this.pDescription.push(this.descArr)
+      // const parsed = JSON.stringify(this.pDescription)
+      // localStorage.setItem('pDescription', parsed)
+      this.descArr = {}
+    },
     onChange(userId) {
       const patientInfo = this.patientListOptions.find(m => m.id === userId)
       this.postForm.name = patientInfo.name
@@ -196,6 +328,8 @@ export default {
     fetchData(id) {
       getAppointment(id).then(response => {
         this.postForm = response.data
+        this.appointmentInfo = response.data
+
         this.postForm.doctor_id = response.data.doctor.name
         this.postForm.patient_id = response.data.patient.name
         if (response.data.doc_image !== null) {
@@ -213,6 +347,8 @@ export default {
         this.postForm.title += `   Appointment Id:${this.postForm.id}`
         this.postForm.content_short += `   Appointment Id:${this.postForm.id}`
 
+        this.pDescription = JSON.parse(response.data.description)
+
         // set tagsview title
         this.setTagsViewTitle()
 
@@ -220,6 +356,7 @@ export default {
         this.setPageTitle()
         this.is_readonly = true
         this.is_disabled = true
+        this.is_show = true
       }).catch(err => {
         console.log(err)
       })
@@ -240,7 +377,10 @@ export default {
           const userData = Object.assign({}, this.postForm)
           if (userData.id > 0) {
             this.updateInput.id = userData.id
-            this.updateInput.description = userData.description
+            const parsed = JSON.stringify(this.pDescription)
+            this.updateInput.description = parsed
+            this.updateInput.problem = userData.problem
+            this.updateInput.advice = userData.advice
             this.updateInput.doc_file = this.isDocFile ? undefined : userData.doc_file
             this.updateInput.doc_image = this.isDocImage ? undefined : userData.doc_image
             updateAppointment(this.updateInput).then(() => {
@@ -251,6 +391,7 @@ export default {
                 duration: 2000
               })
             })
+            this.fetchData(userData.id)
           } else {
             createAppointment(userData).then((res) => {
               this.$notify({
@@ -281,6 +422,12 @@ export default {
         this.doctorListOptions = response.data.items
         this.postForm.doctor_id = id
       })
+    },
+    prescription() {
+      this.appointmentInfo = Object.assign({}, this.appointmentInfo)
+      // this.pDescription = this.appointmentInfo.description.split('<li>')
+      this.dialogStatus = 'update'
+      this.dialogFormVisible = true
     },
     getRemotePatientList(query) {
       searchPatient(query).then(response => {
@@ -362,5 +509,14 @@ export default {
     line-height: 64px;
     color: #fff;
   }
+}
+.prescribedmedicine {
+  padding: 1%;
+  border: 3px solid gray;
+}
+.vl {
+  border-left:4px solid gray;
+  height: 100%;
+  padding: 2%;
 }
 </style>

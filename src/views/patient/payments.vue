@@ -62,7 +62,7 @@
       </el-table-column>
       <el-table-column label="Description" width="200px" align="center">
         <template slot-scope="{row}">
-          <span>{{ row.description }}</span>
+          <span>{{ row.description.substring(0,20)+".." }}</span>
         </template>
       </el-table-column>
       <el-table-column align="center" label="Actions" width="120">

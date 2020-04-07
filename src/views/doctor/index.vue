@@ -110,6 +110,15 @@
         <el-form-item label="Mobile" prop="mobile">
           <el-input v-model="user.mobile" />
         </el-form-item>
+        <el-form-item label="Experience" prop="experience">
+          <el-input v-model="user.experience" />
+        </el-form-item>
+        <el-form-item label="Organisation" prop="organisation">
+          <el-input v-model="user.organisation" />
+        </el-form-item>
+        <el-form-item label="Location" prop="location">
+          <el-input v-model="user.location" />
+        </el-form-item>
         <el-form-item label="Status">
           <el-select v-model="user.status" class="filter-item" placeholder="Please select">
             <el-option v-for="item in statusOptions" :key="item" :label="item" :value="item" />
@@ -186,6 +195,9 @@ export default {
         mobile: '',
         title: '',
         education: '',
+        organisation: '',
+        experience: '',
+        location: '',
         status: 'ACTIVE'
       },
       dialogFormVisible: false,
@@ -264,7 +276,10 @@ export default {
         mobile: '',
         status: 'ACTIVE',
         title: '',
-        education: ''
+        education: '',
+        organisation: '',
+        location: '',
+        experience: ''
       }
       this.listQuery = {
         page: 1,
@@ -348,8 +363,8 @@ export default {
     handleDownload() {
       this.downloadLoading = true
       import('@/vendor/Export2Excel').then(excel => {
-        const tHeader = ['name', 'email', 'mobile', 'title', 'status']
-        const filterVal = ['name', 'email', 'mobile', 'title', 'status']
+        const tHeader = ['name', 'email', 'mobile', 'title', 'organisation', 'experience', 'status']
+        const filterVal = ['name', 'email', 'mobile', 'title', 'organisation', 'experience', 'status']
         const data = this.formatJson(filterVal)
         excel.export_json_to_excel({
           header: tHeader,

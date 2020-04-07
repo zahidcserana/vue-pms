@@ -11,7 +11,7 @@
           <el-card>
             <el-tabs v-model="activeTab">
               <el-tab-pane label="Activity" name="activity">
-                <activity />
+                <activity :payment="payment" />
               </el-tab-pane>
               <el-tab-pane label="Timeline" name="timeline">
                 <timeline :timeline="timeline" />
@@ -36,6 +36,7 @@ import Timeline from './components/Timeline'
 import Account from './components/Account'
 import { patientInfo } from '@/api/patient'
 import { getPatientAppointments } from '@/api/appointment'
+import { getPatientPayments } from '@/api/payment'
 
 export default {
   name: 'Profile',
@@ -45,6 +46,7 @@ export default {
       loading: true,
       user: {},
       timeline: {},
+      payment: {},
       activeTab: 'activity'
     }
   },
@@ -58,6 +60,7 @@ export default {
   created() {
     this.getUser()
     this.getAppointments()
+    this.getPayments()
   },
   methods: {
     getUser() {
@@ -77,6 +80,17 @@ export default {
       const id = this.$route.params && this.$route.params.id
       getPatientAppointments(id).then(response => {
         this.timeline = Object.assign({}, response.data)
+        setTimeout(() => {
+          this.loading = false
+        }, 1.5 * 1000)
+      }).catch(e => {
+        console.log(e)
+      })
+    },
+    getPayments() {
+      const id = this.$route.params && this.$route.params.id
+      getPatientPayments(id).then(response => {
+        this.payment = Object.assign({}, response.data)
         setTimeout(() => {
           this.loading = false
         }, 1.5 * 1000)
