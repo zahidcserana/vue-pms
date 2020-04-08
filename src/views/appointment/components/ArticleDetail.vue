@@ -138,43 +138,87 @@
     </el-form>
     <el-dialog v-if="is_show" :title="textMap[dialogStatus]" :visible.sync="dialogFormVisible">
       <template>
-        <el-row>
-          <el-col :span="12">
-            <span>{{ appointmentInfo.doctor.title }}</span> <br>
-            <span>{{ appointmentInfo.doctor.name }}</span> <br>
-            <span>{{ appointmentInfo.doctor.education }}, {{ appointmentInfo.doctor.experience }}</span>
-          </el-col>
-          <el-col :span="12">
-            <span>{{ appointmentInfo.doctor.organisation }}</span> <br>
-            <span>{{ appointmentInfo.doctor.location }}</span>
-          </el-col>
-        </el-row>
-        <hr>
-        <el-row>
-          <el-col :span="8">
-            <span>{{ appointmentInfo.problem }}</span> <br>
-          </el-col>
-          <el-col :span="16" class="vl">
-            <div v-for="(item,index) in pDescription" :key="index">
-              <strong> <span> {{ index + 1 }}. {{ item.medicine | strippedContent }}</span> </strong> <br>
-              <span> &nbsp;&nbsp;&nbsp; {{ item.rule | strippedContent }}, {{ item.duration | strippedContent }}</span> <br>
-              <br>
-            </div>
-          </el-col>
-        </el-row>
-        <el-row style="text-align: center;">
-          <span>Note: {{ appointmentInfo.advice }}</span> <br>
-        </el-row>
+        <div>
+          <el-row>
+            <el-col :span="12">
+              <span>{{ appointmentInfo.doctor.title }}</span> <br>
+              <span>{{ appointmentInfo.doctor.name }}</span> <br>
+              <span>{{ appointmentInfo.doctor.education }}, {{ appointmentInfo.doctor.experience }}</span>
+            </el-col>
+            <el-col :span="12">
+              <span>{{ appointmentInfo.doctor.organisation }}</span> <br>
+              <span>{{ appointmentInfo.doctor.location }}</span>
+            </el-col>
+          </el-row>
+          <hr>
+          <el-row>
+            <el-col :span="8">
+              <span>{{ appointmentInfo.problem }}</span> <br>
+            </el-col>
+            <el-col :span="16" class="vl">
+              <div v-for="(item,index) in pDescription" :key="index">
+                <strong> <span> {{ index + 1 }}. {{ item.medicine | strippedContent }}</span> </strong> <br>
+                <span> &nbsp;&nbsp;&nbsp; {{ item.rule | strippedContent }}, {{ item.duration | strippedContent }}</span> <br>
+                <br>
+              </div>
+            </el-col>
+          </el-row>
+          <el-row style="text-align: center;">
+            <span>Note: {{ appointmentInfo.advice }}</span> <br>
+          </el-row>
+        </div>
       </template>
       <div slot="footer" class="dialog-footer">
         <el-button @click="dialogFormVisible = false">
           Cancel
         </el-button>
-        <el-button type="primary" @click="dialogStatus==='create'?createData():updateData()">
-          Confirm
+        <el-button type="primary" @click="printDiv('printMe')">
+          Print
         </el-button>
       </div>
     </el-dialog>
+    <div v-if="is_show" style="display: none">
+      <div id="printMe">
+        <table class="table table-responsive" style="width: 100%;padding: 2%;border: 1px solid grey;">
+          <tr>
+            <td colspan="2" style="width: 60%;">
+              <table>
+                <tr><td><span>{{ appointmentInfo.doctor.title }}</span></td></tr>
+                <tr><td><span>{{ appointmentInfo.doctor.name }}</span></td></tr>
+                <tr><td><span>{{ appointmentInfo.doctor.education }}, {{ appointmentInfo.doctor.experience }}</span></td></tr>
+              </table>
+            </td>
+            <td style="width: 40%;">
+              <table>
+                <tr><td><span>{{ appointmentInfo.doctor.organisation }}</span></td></tr>
+                <tr><td><span>{{ appointmentInfo.doctor.location }}</span></td></tr>
+              </table>
+            </td>
+          </tr>
+          <tr>
+            <td style="width: 40%;border-top: 2px solid gray;">
+              <table>
+                <tr><td><span>{{ appointmentInfo.problem }}</span></td></tr>
+              </table>
+            </td>
+            <td colspan="2" style="width: 60%;border-top: 2px solid gray;border-left:4px solid gray;height: 100%;padding: 2%;">
+              <table>
+                <tr v-for="(item,index) in pDescription" :key="index">
+                  <td>
+                    <strong> <span> {{ index + 1 }}. {{ item.medicine | strippedContent }}</span> </strong> <br>
+                    <span> &nbsp;&nbsp;&nbsp; {{ item.rule | strippedContent }}, {{ item.duration | strippedContent }}</span>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+          <tr>
+            <td style="width: 40%;">&nbsp;</td>
+            <td colspan="2" style="width: 60%;padding: 2%;"><span>Note: {{ appointmentInfo.advice }}</span></td>
+          </tr>
+        </table>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -310,6 +354,30 @@ export default {
     this.tempRoute = Object.assign({}, this.$route)
   },
   methods: {
+    printDiv(elem) {
+      const mywindow = window.open('', 'PRINT', 'height=400,width=600')
+
+      mywindow.document.write('<html><head><title>' + document.title + '</title>')
+      mywindow.document.write('</head><body >')
+      // mywindow.document.write('<h3>' + document.title + '</h3>')
+      mywindow.document.write(document.getElementById(elem).innerHTML)
+      mywindow.document.write('</body></html>')
+
+      mywindow.document.close() // necessary for IE >= 10
+      mywindow.focus() // necessary for IE >= 10*/
+
+      mywindow.print()
+      mywindow.close()
+
+      return true
+    },
+    // printDiv(divName) {
+    //   const printContents = document.getElementById(divName).innerHTML
+    //   const originalContents = document.body.innerHTML
+    //   document.body.innerHTML = printContents
+    //   window.print()
+    //   document.body.innerHTML = originalContents
+    // },
     submitDescription: function() {
       if (!this.descArr.medicine) {
         return
@@ -362,12 +430,12 @@ export default {
       })
     },
     setTagsViewTitle() {
-      const title = 'Edit Appointment'
+      const title = 'Appointment'
       const route = Object.assign({}, this.tempRoute, { title: `${title}-${this.postForm.id}` })
       this.$store.dispatch('tagsView/updateVisitedView', route)
     },
     setPageTitle() {
-      const title = 'Edit Appointment'
+      const title = 'Appointment'
       document.title = `${title} - ${this.postForm.id}`
     },
     submitForm() {
