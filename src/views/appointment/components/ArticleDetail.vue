@@ -6,17 +6,24 @@
           <el-col :span="24">
             <div class="postInfo-container">
               <el-row>
-                <el-col :span="10">
+                <el-col :span="7">
                   <el-form-item label-width="60px" label="Doctor:" class="postInfo-container-item">
                     <el-select v-model="postForm.doctor_id" :remote-method="getRemoteUserList" filterable default-first-option remote placeholder="Search doctor" :disabled="is_disabled">
                       <el-option v-for="(item,index) in doctorListOptions" :key="item+index" :label="item.name" :value="item.id" />
                     </el-select>
                   </el-form-item>
                 </el-col>
-                <el-col :span="10">
+                <el-col :span="7">
                   <el-form-item label-width="60px" label="Patient:" class="postInfo-container-item">
                     <el-select v-model="postForm.patient_id" :remote-method="getRemotePatientList" filterable default-first-option remote placeholder="Search patient" :disabled="is_disabled" @change="onChange($event)">
                       <el-option v-for="(item,index) in patientListOptions" :key="item+index" :label="item.name + ' (' + item.mobile + ')'" :value="item.id" />
+                    </el-select>
+                  </el-form-item>
+                </el-col>
+                <el-col :span="6">
+                  <el-form-item label-width="60px" label="Gender:" class="postInfo-container-item">
+                    <el-select v-model="postForm.gender" class="postInfo-container-item" placeholder="Please select">
+                      <el-option v-for="item in genderOptions" :key="item.key" :label="item.display_name" :value="item.key" />
                     </el-select>
                   </el-form-item>
                 </el-col>
@@ -31,7 +38,7 @@
           </el-col>
         </el-row>
         <el-row>
-          <el-col :span="8">
+          <el-col :span="6">
             <el-form-item style="margin-bottom: 40px;" prop="title">
               <MDinput v-model="postForm.name" :maxlength="100" name="name" required :readonly="is_readonly">
                 Name
@@ -39,26 +46,27 @@
             </el-form-item>
           </el-col>
           <el-col :span="1">&nbsp;</el-col>
-          <el-col :span="7">
-            <el-form-item style="margin-bottom: 40px;" prop="title">
+          <el-col :span="5">
+            <el-form-item style="margin-bottom: 40px;" prop="mobile">
               <MDinput v-model="postForm.mobile" :maxlength="100" name="mobile" required :readonly="is_readonly">
                 Mobile
               </MDinput>
             </el-form-item>
           </el-col>
           <el-col :span="1">&nbsp;</el-col>
-          <el-col :span="7">
-            <el-form-item style="margin-bottom: 40px;" prop="title">
-              <MDinput v-model="postForm.age" :maxlength="100" name="age" required :readonly="is_readonly">
+          <el-col :span="5">
+            <el-form-item style="margin-bottom: 40px;" prop="age">
+              <MDinput v-model="postForm.age" :maxlength="100" name="age" required>
                 Age
               </MDinput>
             </el-form-item>
           </el-col>
+          <el-col :span="1">&nbsp;</el-col>
         </el-row>
         <el-row>
           <el-col :span="11">
             <el-form-item style="margin-bottom: 40px;" prop="title">
-              <MDinput v-model="postForm.problem" :maxlength="100" name="age" required>
+              <MDinput v-model="postForm.problem" :maxlength="100" name="problem" required>
                 Problem
               </MDinput>
             </el-form-item>
@@ -129,8 +137,8 @@
             </el-form-item>
           </el-col>
           <el-col :span="1">&nbsp;</el-col>
-          <el-col :span="2">
-            <el-button style="margin-top: 2%;" type="success" @click="submitDescription"> Submit </el-button>
+          <el-col :span="2" style="margin-top: 35px;">
+            <el-button type="success" @click="submitDescription"> Add </el-button>
           </el-col>
           <el-col :span="1">&nbsp;</el-col>
         </el-row>
@@ -148,6 +156,21 @@
             <el-col :span="12">
               <span>{{ appointmentInfo.doctor.organisation }}</span> <br>
               <span>{{ appointmentInfo.doctor.location }}</span>
+            </el-col>
+          </el-row>
+          <hr>
+          <el-row>
+            <el-col :span="6">
+              <strong>Name: </strong><span>{{ appointmentInfo.name }}</span>
+            </el-col>
+            <el-col :span="6">
+              <strong>Gender: </strong><span>{{ appointmentInfo.gender }}</span>
+            </el-col>
+            <el-col :span="6">
+              <strong>Mobile: </strong><span>{{ appointmentInfo.mobile }}</span>
+            </el-col>
+            <el-col :span="6">
+              <strong>Age: </strong><span>{{ appointmentInfo.age }}</span>
             </el-col>
           </el-row>
           <hr>
@@ -193,6 +216,17 @@
                 <tr><td><span>{{ appointmentInfo.doctor.organisation }}</span></td></tr>
                 <tr><td><span>{{ appointmentInfo.doctor.location }}</span></td></tr>
               </table>
+            </td>
+          </tr>
+          <tr>
+            <td colspan="3" style="border-top: 2px solid gray;">
+              <strong>Name: </strong><span>{{ appointmentInfo.name }}</span>,
+              &nbsp;
+              <strong>Gender: </strong><span>{{ appointmentInfo.gender }}</span>,
+              &nbsp;
+              <strong>Mobile: </strong><span>{{ appointmentInfo.mobile }}</span>,
+              &nbsp;
+              <strong>Age: </strong><span>{{ appointmentInfo.age }}</span>
             </td>
           </tr>
           <tr>
@@ -242,9 +276,13 @@ const defaultForm = {
   mobile: '',
   patient_id: '',
   doctor_id: '',
+  gender: '',
   id: undefined
 }
-
+const genderOptions = [
+  { key: 'MALE', display_name: 'Male' },
+  { key: 'FEMALE', display_name: 'Female' }
+]
 export default {
   name: 'AppointmentDetail',
   components: { MDinput, Upload },
@@ -292,6 +330,7 @@ export default {
         create: 'Create'
       },
       patientListOptions: [],
+      genderOptions,
       pDescription: [],
       rules: {
         doc_image: [{ validator: validateRequire }],
@@ -309,6 +348,8 @@ export default {
         description: '',
         problem: '',
         advice: '',
+        gender: '',
+        age: '',
         doc_image: undefined,
         doc_file: undefined
       }
@@ -392,6 +433,7 @@ export default {
       this.postForm.name = patientInfo.name
       this.postForm.mobile = patientInfo.mobile
       this.postForm.age = patientInfo.age
+      this.postForm.gender = patientInfo.gender
     },
     fetchData(id) {
       getAppointment(id).then(response => {
@@ -414,6 +456,7 @@ export default {
         }
         this.postForm.title += `   Appointment Id:${this.postForm.id}`
         this.postForm.content_short += `   Appointment Id:${this.postForm.id}`
+        this.is_show = true
 
         this.pDescription = JSON.parse(response.data.description)
 
@@ -424,7 +467,6 @@ export default {
         this.setPageTitle()
         this.is_readonly = true
         this.is_disabled = true
-        this.is_show = true
       }).catch(err => {
         console.log(err)
       })
@@ -448,6 +490,8 @@ export default {
             const parsed = JSON.stringify(this.pDescription)
             this.updateInput.description = parsed
             this.updateInput.problem = userData.problem
+            this.updateInput.age = userData.age
+            this.updateInput.gender = userData.gender
             this.updateInput.advice = userData.advice
             this.updateInput.doc_file = this.isDocFile ? undefined : userData.doc_file
             this.updateInput.doc_image = this.isDocImage ? undefined : userData.doc_image
@@ -459,7 +503,7 @@ export default {
                 duration: 2000
               })
             })
-            this.fetchData(userData.id)
+            // this.fetchData(userData.id)
           } else {
             createAppointment(userData).then((res) => {
               this.$notify({
