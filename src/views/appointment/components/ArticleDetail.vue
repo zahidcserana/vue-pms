@@ -485,9 +485,9 @@ export default {
         if (valid) {
           this.loading = true
           const userData = Object.assign({}, this.postForm)
+          const parsed = JSON.stringify(this.pDescription)
           if (userData.id > 0) {
             this.updateInput.id = userData.id
-            const parsed = JSON.stringify(this.pDescription)
             this.updateInput.description = parsed
             this.updateInput.problem = userData.problem
             this.updateInput.age = userData.age
@@ -505,6 +505,7 @@ export default {
             })
             // this.fetchData(userData.id)
           } else {
+            userData.description = parsed
             createAppointment(userData).then((res) => {
               this.$notify({
                 title: 'Success',

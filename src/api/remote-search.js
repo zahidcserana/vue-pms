@@ -32,10 +32,17 @@ export function defaultDoctor(id) {
   })
 }
 
-export function transactionList(query) {
+export function summary(query) {
   return request({
-    url: '/vue-element-admin/transaction/list',
-    method: 'get',
-    params: query
+    url: `${env.api_url}/summary/`,
+    method: 'get'
   })
 }
+
+// export function transactionList(query) {
+//   return request({
+//     url: '/vue-element-admin/transaction/list',
+//     method: 'get',
+//     params: query
+//   })
+// }

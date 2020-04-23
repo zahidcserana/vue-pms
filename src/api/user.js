@@ -13,16 +13,18 @@ export function getInfo(token) {
   return request({
     url: `${env.domain}users/token/info/`,
     // url: '/vue-element-admin/user/info',
-    method: 'get',
-    params: { token }
+    method: 'get'
   })
 }
 
 export function logout() {
-  return request({
-    url: '/vue-element-admin/user/logout',
-    method: 'post'
-  })
+  localStorage.removeItem('token')
+  return localStorage.removeItem('user_info')
+
+  // return request({
+  //   url: '/vue-element-admin/user/logout',
+  //   method: 'post'
+  // })
 }
 
 export function fetchUserList(query) {

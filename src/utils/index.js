@@ -8,11 +8,16 @@
  * @param {string} cFormat
  * @returns {string | null}
  */
+const server = 'http://127.0.0.1:8000/'
+// const server = 'https://glacial-temple-72048.herokuapp.com/'
+const url = server
 
 export const env = {
   production: false,
-  api_url: 'http://127.0.0.1:8000/api',
-  domain: 'http://127.0.0.1:8000/',
+  api_url: `${url}api`,
+  // api_url: 'http://127.0.0.1:8000/api',
+  domain: url,
+  // domain: 'http://127.0.0.1:8000/',
   url: 'http://127.0.0.1:8000',
   protocal: 'http://',
   storeHoshName: 'localhost:8080',

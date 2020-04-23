@@ -46,7 +46,7 @@
 
       <el-button :loading="loading" type="primary" style="width:100%;margin-bottom:30px;" @click.native.prevent="handleLogin">Login</el-button>
 
-      <div style="position:relative">
+      <!-- <div style="position:relative">
         <div class="tips">
           <span>Username : admin</span>
           <span>Password : any</span>
@@ -59,7 +59,7 @@
         <el-button class="thirdparty-button" type="primary" @click="showDialog=true">
           Or connect with
         </el-button>
-      </div>
+      </div> -->
     </el-form>
 
     <el-dialog title="Or connect with" :visible.sync="showDialog">
@@ -76,8 +76,9 @@
 import { validUsername } from '@/utils/validate'
 import SocialSign from './components/SocialSignin'
 import axios from 'axios'
-import { env } from '@/utils/auth'
+import { env } from '@/utils'
 import { setToken } from '@/utils/auth'
+import { getInfo } from '@/api/user'
 
 export default {
   name: 'Login',
@@ -156,8 +157,10 @@ export default {
     },
     handleLogin() {
       axios
-        .post(env.api_url + `token/`, this.loginForm)
+        .post(env.api_url + `/token/`, this.loginForm)
         .then(response => {
+          console.log(response.data.access)
+          // localStorage.setItem('token', response.data.access)
           // this.$swal({
           //   position: "top-end",
           //   icon: "success",
@@ -165,7 +168,9 @@ export default {
           //   showConfirmButton: false,
           //   timer: 1500
           // });
-          setToken('Admin-Token')
+          setToken(response.data.access)
+          this.getUserInfo()
+
           this.$router.push({ path: this.redirect || '/', query: this.otherQuery })
           this.loading = false
         })
@@ -194,6 +199,13 @@ export default {
       //     return false
       //   }
       // })
+    },
+    getUserInfo() {
+      console.log('set-details')
+      getInfo(localStorage.getItem('token')).then(res => {
+        const parsed = JSON.stringify(res)
+        localStorage.setItem('user_info', parsed)
+      })
     },
     getOtherQuery(query) {
       return Object.keys(query).reduce((acc, cur) => {
