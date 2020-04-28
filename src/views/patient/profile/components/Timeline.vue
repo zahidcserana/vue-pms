@@ -5,7 +5,11 @@
         <el-card>
           <h4>{{ item.name }}</h4>
           <h3>{{ item.problem }}</h3>
-          <p>{{ item.description | strippedContent }}</p>
+          <div v-for="(prescription,q) of (item.description)" :key="q">
+            <p> <strong>{{ q + 1 }}.</strong> {{ prescription.medicine }} </p>
+            <p> &nbsp;&nbsp;&nbsp; {{ prescription.rule }}, {{ prescription.duration }} </p>
+          </div>
+          <!-- <p>{{ item.description | strippedContent }}</p> -->
         </el-card>
       </el-timeline-item>
     </el-timeline>
@@ -26,7 +30,7 @@ export default {
   },
   props: {
     timeline: {
-      type: Object,
+      type: Array,
       default: () => {
         return {
           created_at: '',

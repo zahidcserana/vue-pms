@@ -4,7 +4,7 @@
       <el-row :gutter="20">
 
         <el-col :span="6" :xs="24">
-          <user-card :user="user" />
+          <user-card :user="user" :summary="summary" />
         </el-col>
 
         <el-col :span="18" :xs="24">
@@ -34,7 +34,7 @@ import UserCard from './components/UserCard'
 import Activity from './components/Activity'
 import Timeline from './components/Timeline'
 import Account from './components/Account'
-import { patientInfo } from '@/api/patient'
+import { patientInfo, getPatientSummary } from '@/api/patient'
 import { getPatientAppointments } from '@/api/appointment'
 import { getPatientPayments } from '@/api/payment'
 
@@ -45,7 +45,8 @@ export default {
     return {
       loading: true,
       user: {},
-      timeline: {},
+      summary: {},
+      timeline: [],
       payment: {},
       activeTab: 'activity'
     }
@@ -61,6 +62,7 @@ export default {
     this.getUser()
     this.getAppointments()
     this.getPayments()
+    this.getSummary()
   },
   methods: {
     getUser() {
@@ -76,10 +78,24 @@ export default {
         console.log(e)
       })
     },
+    getSummary() {
+      const id = this.$route.params && this.$route.params.id
+      getPatientSummary(id).then(response => {
+        this.summary = response.data
+        setTimeout(() => {
+          this.loading = false
+        }, 1.5 * 1000)
+      }).catch(e => {
+        console.log(e)
+      })
+    },
     getAppointments() {
       const id = this.$route.params && this.$route.params.id
       getPatientAppointments(id).then(response => {
-        this.timeline = Object.assign({}, response.data)
+        this.timeline = response.data
+        this.timeline.forEach(item => {
+          item.description = JSON.parse(item.description)
+        })
         setTimeout(() => {
           this.loading = false
         }, 1.5 * 1000)

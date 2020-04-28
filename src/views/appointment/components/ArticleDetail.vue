@@ -454,8 +454,8 @@ export default {
         } else {
           this.postForm.doc_file = undefined
         }
-        this.postForm.title += `   Appointment Id:${this.postForm.id}`
-        this.postForm.content_short += `   Appointment Id:${this.postForm.id}`
+        this.postForm.title += `Appointment Id:${this.postForm.id}`
+        this.postForm.content_short += `Appointment Id:${this.postForm.id}`
         this.is_show = true
 
         this.pDescription = JSON.parse(response.data.description)

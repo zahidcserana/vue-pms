@@ -24,6 +24,13 @@ export function patientInfo(id) {
   })
 }
 
+export function getPatientSummary(id) {
+  return request({
+    url: `${env.api_url}/patient-summary/${id}/`,
+    method: 'get'
+  })
+}
+
 export function createPatient(data) {
   return request({
     url: `${env.api_url}/patients/`,
