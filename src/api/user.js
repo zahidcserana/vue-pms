@@ -51,6 +51,13 @@ export function updateUser(data) {
   })
 }
 
+export function deleteUser(data) {
+  return request({
+    url: `${env.api_url}/users/${data.id}/`,
+    method: 'delete'
+  })
+}
+
 export function createUser(data) {
   return request({
     url: `${env.api_url}/users/`,

@@ -1,13 +1,13 @@
 <template>
   <div class="app-container">
     <div class="filter-container">
-      <el-input v-model="listQuery.name" placeholder="Name" style="width: 200px;" class="filter-item" @keyup.enter.native="handleFilter" />
+      <el-input v-model="listQuery.username" placeholder="UserName" style="width: 200px;" class="filter-item" @keyup.enter.native="handleFilter" />
       <el-input v-model="listQuery.email" placeholder="Email" style="width: 200px;" class="filter-item" @keyup.enter.native="handleFilter" />
-      <el-select v-model="listQuery.status" placeholder="Status" clearable style="width: 90px" class="filter-item">
+      <!-- <el-select v-model="listQuery.is_active" placeholder="Status" clearable style="width: 90px" class="filter-item">
         <el-option v-for="item in statusOptions" :key="item" :label="item" :value="item" />
-      </el-select>
-      <el-select v-model="listQuery.type" placeholder="Type" clearable class="filter-item" style="width: 130px">
-        <el-option v-for="item in userTypeOptions" :key="item.key" :label="item.display_name+'('+item.key+')'" :value="item.key" />
+      </el-select> -->
+      <el-select v-model="listQuery.is_active" placeholder="Status" clearable class="filter-item" style="width: 130px">
+        <el-option v-for="item in userTypeOptions" :key="item.key" :label="item.display_name" :value="item.key" />
       </el-select>
       <el-select v-model="listQuery.ordering" style="width: 140px" class="filter-item" @change="handleFilter">
         <el-option v-for="item in sortOptions" :key="item.key" :label="item.label" :value="item.key" />
@@ -41,9 +41,14 @@
           <span>{{ row.id }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="Name" width="200px">
+      <el-table-column label="name" width="200px">
         <template slot-scope="{row}">
-          <span class="link-type" @click="handleUpdate(row)">{{ row.name }}</span>
+          <span class="link-type" @click="handleUpdate(row)">{{ row.first_name }} {{ row.last_name }}</span>
+        </template>
+      </el-table-column>
+      <el-table-column label="Username" width="200px">
+        <template slot-scope="{row}">
+          <span class="link-type" @click="handleUpdate(row)">{{ row.username }}</span>
         </template>
       </el-table-column>
       <el-table-column label="Email" width="200px">
@@ -53,30 +58,30 @@
       </el-table-column>
       <el-table-column label="Mobile" width="200px" align="center">
         <template slot-scope="{row}">
-          <span>{{ row.mobile }}</span>
+          <span>{{ row.profile.mobile }}</span>
         </template>
       </el-table-column>
       <el-table-column label="Department" width="200px" align="center">
         <template slot-scope="{row}">
-          <span>{{ row.department == null ? '' : row.department.name }}</span>
+          <span>{{ row.profile.department == null ? '' : row.profile.department }}</span>
         </template>
       </el-table-column>
       <el-table-column label="Date" width="150px" align="center">
         <template slot-scope="{row}">
-          <span>{{ row.timestamp | parseTime('{y}-{m}-{d} {h}:{i}') }}</span>
+          <span>{{ row.date_joined | parseTime('{y}-{m}-{d}') }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="Type" class-name="status-col" width="100">
+      <!-- <el-table-column label="Type" class-name="status-col" width="100">
         <template slot-scope="{row}">
           <el-tag :type="row.type | userTypeFilter">
             {{ row.type }}
           </el-tag>
         </template>
-      </el-table-column>
+      </el-table-column> -->
       <el-table-column label="Status" class-name="status-col" width="100">
         <template slot-scope="{row}">
-          <el-tag :type="row.status | statusFilter">
-            {{ row.status }}
+          <el-tag :type="row.is_active | statusFilter">
+            {{ row.is_active ? 'Active' : 'Inactive' }}
           </el-tag>
         </template>
       </el-table-column>
@@ -85,13 +90,13 @@
           <el-button type="primary" size="mini" @click="handleUpdate(row)">
             Edit
           </el-button>
-          <el-button v-if="row.status!='ACTIVE'" size="mini" type="success" @click="handleModifyStatus(row,'ACTIVE')">
+          <el-button v-if="row.is_active!= true" size="mini" type="success" @click="handleModifyStatus(row, true)">
             Active
           </el-button>
-          <el-button v-if="row.status!='INACTIVE'" size="mini" @click="handleModifyStatus(row,'INACTIVE')">
+          <el-button v-if="row.is_active!= false && row.id !==1" size="mini" @click="handleModifyStatus(row, false)">
             Inactive
           </el-button>
-          <el-button v-if="row.status!='DELETE'" size="mini" type="danger" @click="handleModifyStatus(row,'DELETE')">
+          <el-button v-if="row.id !==1" size="mini" type="danger" @click="handleModifyStatus(row,'DELETE')">
             Delete
           </el-button>
         </template>
@@ -102,30 +107,39 @@
 
     <el-dialog :title="textMap[dialogStatus]" :visible.sync="dialogFormVisible">
       <el-form ref="dataForm" :rules="rules" :model="user" label-position="left" label-width="100px" style="width: 400px; margin-left:50px;">
-        <el-form-item label="Type" prop="type">
-          <el-select v-model="user.type" class="filter-item" placeholder="Please select">
+        <el-form-item label="Status" prop="is_active">
+          <el-select v-model="user.is_active" class="filter-item" placeholder="Please select">
             <el-option v-for="item in userTypeOptions" :key="item.key" :label="item.display_name" :value="item.key" />
           </el-select>
         </el-form-item>
         <el-form-item label="Department" prop="department">
-          <el-select v-model="user.department_id" class="filter-item" placeholder="Please select">
-            <el-option v-for="item in departments" :key="item.id" :label="item.name" :value="item.id" />
+          <el-select v-model="user.profile.department" class="filter-item" placeholder="Please select">
+            <el-option v-for="item in departments" :key="item.name" :label="item.name" :value="item.name" />
           </el-select>
         </el-form-item>
-        <el-form-item label="Name" prop="name">
-          <el-input v-model="user.name" />
+        <el-form-item label="Username" prop="username">
+          <el-input v-model="user.username" />
+        </el-form-item>
+        <el-form-item label="Firstname" prop="first_name">
+          <el-input v-model="user.first_name" />
+        </el-form-item>
+        <el-form-item label="Lastname" prop="last_name">
+          <el-input v-model="user.last_name" />
+        </el-form-item>
+        <el-form-item label="Password" prop="password">
+          <el-input v-model="user.password" :type="passwordType" />
         </el-form-item>
         <el-form-item label="Email" prop="email">
           <el-input v-model="user.email" />
         </el-form-item>
         <el-form-item label="Mobile" prop="mobile">
-          <el-input v-model="user.mobile" />
+          <el-input v-model="user.profile.mobile" />
         </el-form-item>
-        <el-form-item label="Status">
+        <!-- <el-form-item label="Status">
           <el-select v-model="user.status" class="filter-item" placeholder="Please select">
             <el-option v-for="item in statusOptions" :key="item" :label="item" :value="item" />
           </el-select>
-        </el-form-item>
+        </el-form-item> -->
       </el-form>
       <div slot="footer" class="dialog-footer">
         <el-button @click="dialogFormVisible = false">
@@ -151,14 +165,14 @@
 
 <script>
 import { fetchPv } from '@/api/article'
-import { fetchUserList, updateUser, createUser, fetchDepartmentList } from '@/api/user'
+import { fetchUserList, updateUser, deleteUser, createUser, fetchDepartmentList } from '@/api/user'
 import waves from '@/directive/waves' // waves directive
 import { parseTime } from '@/utils'
 import Pagination from '@/components/Pagination' // secondary package based on el-pagination
 
 const userTypeOptions = [
-  { key: 'ADMIN', display_name: 'Admin' },
-  { key: 'USER', display_name: 'User' }
+  { key: true, display_name: 'Active' },
+  { key: false, display_name: 'Inactive' }
 ]
 
 // arr to obj, such as { CN : "China", US : "USA" }
@@ -174,25 +188,25 @@ export default {
   filters: {
     statusFilter(status) {
       const statusMap = {
-        ACTIVE: 'success',
-        INACTIVE: 'info',
-        DELETE: 'danger'
+        true: 'success',
+        false: 'danger'
       }
       return statusMap[status]
     },
-    userTypeFilter(status) {
-      const statusMap = {
-        ADMIN: 'primary',
-        USER: 'danger'
-      }
-      return statusMap[status]
-    },
+    // userTypeFilter(status) {
+    //   const statusMap = {
+    //     ADMIN: 'primary',
+    //     USER: 'danger'
+    //   }
+    //   return statusMap[status]
+    // },
     typeFilter(type) {
       return userTypeKeyValue[type]
     }
   },
   data() {
     return {
+      passwordType: 'password',
       tableKey: 0,
       list: null,
       departments: null,
@@ -201,25 +215,29 @@ export default {
       listQuery: {
         page: 1,
         limit: 20,
-        status: undefined,
-        name: undefined,
+        is_active: undefined,
+        username: undefined,
         email: undefined,
-        type: undefined,
         ordering: '+id'
       },
       importanceOptions: [1, 2, 3],
       userTypeOptions,
       sortOptions: [{ label: 'ID Ascending', key: '+id' }, { label: 'ID Descending', key: '-id' }],
-      statusOptions: ['ACTIVE', 'INACTIVE', 'DELETE'],
+      statusOptions: [true, false],
       showReviewer: false,
       user: {
         id: undefined,
-        name: '',
-        department_id: '',
+        username: '',
+        password: '',
+        first_name: '',
+        last_name: '',
+        profile: {
+          department: '',
+          mobile: ''
+        },
         email: '',
-        mobile: '',
         type: 'USER',
-        status: 'ACTIVE'
+        is_active: true
       },
       dialogFormVisible: false,
       dialogStatus: '',
@@ -230,8 +248,8 @@ export default {
       dialogPvVisible: false,
       pvData: [],
       rules: {
-        type: [{ required: true, message: 'type is required', trigger: 'change' }],
-        name: [{ required: true, message: 'name is required', trigger: 'blur' }]
+        'profile[mobile]': [{ required: true, message: 'mobile is required', trigger: 'change' }],
+        username: [{ required: true, message: 'name is required', trigger: 'blur' }]
       },
       downloadLoading: false
     }
@@ -269,18 +287,32 @@ export default {
     },
     handleModifyStatus(row, status) {
       console.log(status)
-      const statusData = { status: status, id: row.id }
-      updateUser(statusData).then(() => {
-        this.getList()
-        this.dialogFormVisible = false
-        this.$message({
-          message: 'Success',
-          type: 'success'
+      if (status === 'DELETE') {
+        deleteUser(row).then(() => {
+          this.getList()
+          this.dialogFormVisible = false
+          this.$message({
+            message: 'Success',
+            type: 'success'
+          })
+          row.status = status
+        }).catch(e => {
+          console.log(e)
         })
-        row.status = status
-      }).catch(e => {
-        console.log(e)
-      })
+      } else {
+        const statusData = { is_active: status, id: row.id }
+        updateUser(statusData).then(() => {
+          this.getList()
+          this.dialogFormVisible = false
+          this.$message({
+            message: 'Success',
+            type: 'success'
+          })
+          row.status = status
+        }).catch(e => {
+          console.log(e)
+        })
+      }
     },
     sortChange(data) {
       const { prop, order } = data
@@ -299,19 +331,24 @@ export default {
     resetTemp() {
       this.user = {
         id: undefined,
-        name: '',
+        username: '',
+        password: '',
+        first_name: '',
+        last_name: '',
+        profile: {
+          department: '',
+          mobile: ''
+        },
         email: '',
-        mobile: '',
-        status: 'ACTIVE',
-        type: 'USER'
+        type: 'USER',
+        is_active: true
       }
       this.listQuery = {
         page: 1,
         limit: 20,
-        status: undefined,
-        name: undefined,
+        is_active: undefined,
+        username: undefined,
         email: undefined,
-        type: undefined,
         ordering: '+id'
       }
     },
@@ -387,8 +424,8 @@ export default {
     handleDownload() {
       this.downloadLoading = true
       import('@/vendor/Export2Excel').then(excel => {
-        const tHeader = ['name', 'email', 'mobile', 'type', 'status']
-        const filterVal = ['name', 'email', 'mobile', 'type', 'status']
+        const tHeader = ['first_name', 'last_name', 'email', 'mobile', 'status']
+        const filterVal = ['first_name', 'last_name', 'email', 'mobile', 'is_active']
         const data = this.formatJson(filterVal)
         excel.export_json_to_excel({
           header: tHeader,

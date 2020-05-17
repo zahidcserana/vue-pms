@@ -46,9 +46,7 @@
       </el-table-column>
       <el-table-column label="Email" width="200px">
         <template slot-scope="{row}">
-          <router-link :to="'/patients/edit/'+row.id" class="link-type">
-            <span>{{ row.email }}</span>
-          </router-link>
+          <span>{{ row.email }}</span>
         </template>
       </el-table-column>
       <el-table-column label="Mobile" width="200px" align="center">
