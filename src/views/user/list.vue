@@ -58,12 +58,12 @@
       </el-table-column>
       <el-table-column label="Mobile" width="200px" align="center">
         <template slot-scope="{row}">
-          <span>{{ row.profile.mobile }}</span>
+          <span>{{ row.profile ? row.profile.mobile : '' }}</span>
         </template>
       </el-table-column>
       <el-table-column label="Department" width="200px" align="center">
         <template slot-scope="{row}">
-          <span>{{ row.profile.department == null ? '' : row.profile.department }}</span>
+          <span>{{ row.profile ? row.profile.department : '' }}</span>
         </template>
       </el-table-column>
       <el-table-column label="Date" width="150px" align="center">
